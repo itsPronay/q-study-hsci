@@ -52,8 +52,8 @@ def generate(image, gt, index, nTrain_perClass, nvalid_perClass, test_pred, OA, 
         
  
     predicted_thematic_map = predicted_thematic_map[halfsize:number_of_rows -halfsize,halfsize:number_of_columns-halfsize,: ]
-    gt_thematic_map = gt_thematic_map[halfsize:number_of_rows -halfsize,halfsize:number_of_columns-halfsize,: ]     
+    gt_thematic_map = gt_thematic_map[halfsize:number_of_rows -halfsize,halfsize:number_of_columns-halfsize,: ]    
     classification_map(predicted_thematic_map, gt, 600,
-                       './classification_maps/' + dataset + '_' + day_str +'_' + str(num) +'_OA_'+ str(round(OA, 2)) + '_' + model_name +  '.png')
+                       'classification_maps/' + 'SpectralSpacialMamba_Dataset:' + dataset + '_' + day_str +'_' + str(num) +'_OA_'+ str(round(OA, 2)) + '_' + model_name +  '.png')
     
     return predicted_thematic_map, gt_thematic_map
