@@ -8,7 +8,7 @@ from spectralFormer.vit_pytorch import ViT
 from spectralSpacialMamba.run import run as run_mamba
 
 parser = argparse.ArgumentParser(description='SpectralFormer')
-parser.add_argument('--model', choices=['SpectralFormer', 'SpectralSpacialMamba'], default='SpectralFormer')
+parser.add_argument('--model', type=str,choices=['SpectralFormer', 'SpectralSpacialMamba'], default='SpectralSpacialMamba')
 parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'P', 'Houston'], default='UP')
 parser.add_argument('--group_size', type=int, default=145)
 parser.add_argument('--batch_size', type=int, default=64)
