@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
+import os 
 
 import numpy as np
 from sklearn import metrics
@@ -158,3 +159,10 @@ def record_output(oa_ae, aa_ae, kappa_ae, element_acc_ae, cm, training_time_ae, 
         f.write(str(mean_cm[i]) + '\n')
     f.write("########################################################################################################" +'\n'+ '\n')
     f.close()
+
+def saveModel(model, net_name, dataset, run_num, path = 'saved_models'):
+    if not os.path.exists(path):
+        os.makedirs(path)
+    model_save_path = f'{path}/{net_name}_{dataset}_run{run_num}.pt'
+    torch.save(model.state_dict(), model_save_path)
+    print(f'Model saved to {model_save_path}')

@@ -23,7 +23,7 @@ def load_data(dataset):
     image = image.astype(np.float32)
     return image, label
 
-def readdata(args, num):
+def readdata(args, dataset, num):
 
     or_image, or_label = load_data(args.dataset)
     windowsize = args.windowsize
@@ -77,7 +77,6 @@ def readdata(args, num):
     validation_label = np.zeros(np.sum(nvalid_perClass), dtype=np.int32)
     train_image = np.zeros([np.sum(nTrain_perClass), windowsize, windowsize, bands], dtype=np.float32)
     train_label = np.zeros(np.sum(nTrain_perClass),dtype=np.int32)
-
 
     for i in range(number_class):
 

@@ -34,7 +34,13 @@ def main():
     if args.model == 'SpectralFormer':
         print('Training SpectralFormer...')
     elif args.model == 'SpectralSpacialMamba':
-        run_mamba(args.dataset)
+        run_mamba(args)
+    elif args.model == 'mvit':
+        print('Training mvit...')
+    else:
+        raise ValueError(f"Unknown model: {args.model}")
+    
+    
 
 
 

@@ -2,6 +2,8 @@ import time
 import datetime
 import numpy as np
 import os
+import wandb 
+import argparse
 
 import torch
 import torch.nn as nn
@@ -12,11 +14,46 @@ from config import load_args
 from data_read import readdata
 from generate_pic import generate
 from spectralSpacialMamba.utils import tr_acc, test_batch, record_output
-
+from spectralSpacialMamba.utils import saveModel 
 from model import mamba_1D_model, mamba_2D_model, mamba_SS_model
 
 
-def run(dataset):
+parser = argparse.ArgumentParser()
+
+# Pre training
+parser.add_argument('--train_num', type=int, default=20)
+parser.add_argument('--windowsize', type=int, default=27)
+parser.add_argument('--type', type=str, default='none')
+
+# training parameter
+parser.add_argument('--batch_size', type=int, default=512)
+parser.add_argument('--epoch', type=int, default=190)
+parser.add_argument('--lr', type=float, default=5e-4)
+parser.add_argument('--drop_rate', type=float, default=0.0)
+parser.add_argument('--lr_decay', type=float, default=0.5)
+
+# model parameter
+parser.add_argument('--model_id', type=int, default=2,
+                    help='0: 1D, 1: 2D, 2: SS')
+
+parser.add_argument('--spe_windowsize', type=int, default=3)
+parser.add_argument('--spa_patch_size', type=int, default=3)
+parser.add_argument('--spe_patch_size', type=int, default=2)
+parser.add_argument('--hid_chans', type=int, default=64)
+parser.add_argument('--embed_dim', type=int, default=64)
+parser.add_argument('--depth', type=int, default=4)
+
+parser.add_argument('--use_bi', default=True, type=lambda x: (str(x).lower() == 'true'), help='use bidirection or not' )  
+parser.add_argument('--use_global', default=True, type=bool,
+                    help='use token meaning or not') 
+parser.add_argument('--use_cls', default=True, type=bool,
+                    help='use class tken or not') 
+parser.add_argument('--use_fu', default=True, type=lambda x: (str(x).lower() == 'true'),
+                    help='use center augmentation fusion or not') 
+    
+args = parser.parse_args()
+
+def run(dataset, epoch):
     day = datetime.datetime.now()
     day_str = day.strftime('%m_%d_%H_%M')
     args = load_args()
@@ -28,7 +65,6 @@ def run(dataset):
     train_num = args.train_num
 
     lr = args.lr
-    epoch = args.epoch
     batch_size = args.batch_size
     drop_rate = args.drop_rate
     gamma = args.lr_decay
@@ -46,7 +82,7 @@ def run(dataset):
     use_cls = args.use_cls
 
     halfsize = int((windowsize-1)/2)
-    train_image, train_label, validation_image, validation_label,nTrain_perClass, nvalid_perClass, index,image, gt,s = readdata(args, 0)
+    train_image, train_label, validation_image, validation_label,nTrain_perClass, nvalid_perClass, index,image, gt,s = readdata(args, dataset, 0)
     gt = gt.astype(np.int32)
     nclass = np.max(gt)
     result = np.zeros([nclass+3, num_of_ex])
@@ -109,7 +145,6 @@ def run(dataset):
                 
                 print('epoch:', i, 'loss:%.4f' % train_loss,'train_acc:%.4f'%train_acc.item(), 'val_acc:%.4f'%val_acc.item())
         toc1 = time.time()
-        
       
 
         true_cla, overall_accuracy, average_accuracy, kappa, cm, test_pred= test_batch(model.eval(), image, index, 400,  nTrain_perClass, nvalid_perClass, halfsize)
@@ -130,18 +165,33 @@ def run(dataset):
         TESTING_TIME.append(toc2 - toc1)
         ELEMENT_ACC = np.array(AC)
         
+    # wriut code to get standard deviation here 
+
+    
     if not os.path.exists('record'):
         os.makedirs('record')
     np.save('record/'+ net_name +'_'+ day_str + '_' +dataset+'_'+str(train_image.shape[0]) + '_epoch_' + str(epoch) + '_spa_patch_size_' + str(spa_patch_size) +'_spe_patch_size_'+str(spe_patch_size) + '_embed_dim_'+str(embed_dim)+'_depth _'+str(depth)+ '_use_global_'+str(use_global) +'_use_bi _'+str(use_bi)+'_hdi_chans_'+str(hid_chans)+'_lr _'+str(lr)+'_lrdecay_'+str(gamma)+ '_fusion_'+str(args.use_fu) +'_.npy', result)
         
     record_output(OA, AA, KA, ELEMENT_ACC, CM, TRAINING_TIME, TESTING_TIME, './record/' + net_name +'_'+ day_str + '_' +dataset+'_'+str(train_image.shape[0])+ '_epoch_' + str(epoch)+ '_spa_patch_size_' +str(spa_patch_size) +'_spe_patch_size_'+str(spe_patch_size) + '_embed_dim_'+str(embed_dim)+'_depth _'+str(depth)+ '_use_global_'+str(use_global) +'_use_bi _'+str(use_bi)+'_hdi_chans_'+str(hid_chans)+'_lr _'+str(lr)+'_lrdecay_'+str(gamma)+ '_fusion_'+str(args.use_fu) + '_end.txt') 
     
-    # Save the model that we are testing upon
-    if not os.path.exists('saved_models'):
-        os.makedirs('saved_models')
-    model_save_path = f'saved_models/{net_name}_{dataset}_run{num}.pt'
-    torch.save(model.state_dict(), model_save_path)
-    print(f'Model saved to {model_save_path}')
+    output = {
+        'model' : 'SpectralSpacialMamba',
+        'dataset' : str(dataset),
+        'epochs' : str(epoch),
+        'overall_accuracy' : OA,
+        'average_accuracy' : AA,
+        'kappa' : KA,
+        'element_acc' : ELEMENT_ACC,
+        'training_time' : TRAINING_TIME,
+        'testing_time' : TESTING_TIME,
+    }
 
+    wandb.log(
+        
+    )
+
+    # Save the model
+    saveModel(model, net_name='SpectralSpacialMamba', dataset=dataset, run_num=num, path='saved_models')
+   
     jingdu = np.mean(result, axis = -1)
     print(jingdu)
