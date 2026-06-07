@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from mamba import SSM
+from .mamba import SSM
 
 
 from functools import partial
