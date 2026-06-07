@@ -120,7 +120,7 @@ def run(args):
         true_cla, overall_accuracy, average_accuracy, kappa, cm, test_pred= test_batch(model.eval(), image, index, args.batch_size,  nTrain_perClass, nvalid_perClass, halfsize)
         toc2 = time.time()
 
-        true_cla_quantized, overall_accuracy_quantized, average_accuracy_quantized, kappa_quantized, cm_quantized, test_pred_quantized= test_batch_quantized(model.eval(), image, index, args.batch_size,  nTrain_perClass, nvalid_perClass, halfsize)
+        true_cla_quantized, overall_accuracy_quantized, average_accuracy_quantized, kappa_quantized, cm_quantized, test_pred_quantized= test_batch_quantized(args, model.eval(), image, index, args.batch_size,  nTrain_perClass, nvalid_perClass, halfsize)
         
         classification_map, gt_map = generate(image, gt, index, nTrain_perClass, nvalid_perClass, test_pred, overall_accuracy, halfsize, args.dataset, day_str, num, net_name)
         classification_map_quantized, gt_map_quantized = generate(image, gt, index, nTrain_perClass, nvalid_perClass, test_pred_quantized, overall_accuracy_quantized, halfsize, args.dataset, day_str+'_quantized', num, net_name+'_quantized')
