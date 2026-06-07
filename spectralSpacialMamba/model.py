@@ -7,7 +7,7 @@ from functools import partial
 from typing import Callable
 from timm.models.layers import DropPath
 
-from pos_embed import get_2d_sincos_pos_embed
+from .pos_embed import get_2d_sincos_pos_embed
 
 
 class block_1D(nn.Module):
