@@ -1,8 +1,8 @@
 import numpy as np
 import scipy.io as sio
 from sklearn.decomposition import PCA
-from ..utils.download_dataset import downloadAndLoadDataset
-
+# from utils.download_dataset import downloadAndLoadDataset
+import utils.download_dataset as download_dataset
 
 def pca_whitening(image, number_of_pc):
 
@@ -19,13 +19,13 @@ def pca_whitening(image, number_of_pc):
     return pc_images
 
 def load_data(dataset):
-    image, label = downloadAndLoadDataset(dataset)
+    image, label = download_dataset.downloadAndLoadDataset(dataset)
     image = image.astype(np.float32)
     return image, label
 
 def readdata(args, dataset, num):
 
-    or_image, or_label = load_data(args.dataset)
+    or_image, or_label = load_data(dataset)
     windowsize = args.windowsize
     train_num = args.train_num
     halfsize = int((windowsize-1)/2)
