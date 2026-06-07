@@ -10,11 +10,11 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 
-from data_read import readdata
-from generate_pic import generate
+from .data_read import readdata
+from .generate_pic import generate
 from spectralSpacialMamba.utils import tr_acc, test_batch, record_output
 from spectralSpacialMamba.utils import saveModel 
-from model import mamba_1D_model, mamba_2D_model, mamba_SS_model
+from .model import mamba_1D_model, mamba_2D_model, mamba_SS_model
 
 
 parser = argparse.ArgumentParser()
