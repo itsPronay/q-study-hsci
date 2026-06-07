@@ -39,8 +39,10 @@ def main():
         print('Training mvit...')
     else:
         raise ValueError(f"Unknown model: {args.model}")
-    
-    
+
+if __name__ == '__main__':
+    main()
+
 
 
 
