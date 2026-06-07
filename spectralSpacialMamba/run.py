@@ -10,7 +10,6 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 
-from config import load_args
 from data_read import readdata
 from generate_pic import generate
 from spectralSpacialMamba.utils import tr_acc, test_batch, record_output
@@ -56,7 +55,6 @@ args = parser.parse_args()
 def run(dataset, epoch):
     day = datetime.datetime.now()
     day_str = day.strftime('%m_%d_%H_%M')
-    args = load_args()
 
     num_of_ex = 10
     windowsize = args.windowsize

@@ -9,7 +9,7 @@ from spectralSpacialMamba.run import run as run_mamba
 
 parser = argparse.ArgumentParser(description='SpectralFormer')
 parser.add_argument('--model', choices=['SpectralFormer', 'SpectralSpacialMamba'], default='SpectralFormer', default='SpectralFormer')
-parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'P', 'Houston'], default='PaviaU')
+parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'P', 'Houston'], default='UP')
 parser.add_argument('--group_size', type=int, default=145)
 parser.add_argument('--batch_size', type=int, default=64)
 parser.add_argument('--num_epochs', type=int, default=200)
