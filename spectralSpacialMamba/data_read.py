@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.io as sio
 from sklearn.decomposition import PCA
-from utils.download_dataset import downloadAndLoadDataset
+from ..utils.download_dataset import downloadAndLoadDataset
 
 
 def pca_whitening(image, number_of_pc):
