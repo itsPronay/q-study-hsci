@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(description='SpectralFormer')
 parser.add_argument('--model', type=str,choices=['SpectralFormer', 'SpectralSpacialMamba'], default='SpectralSpacialMamba')
 parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'P', 'Houston'], default='UP')
 parser.add_argument('--group_size', type=int, default=145)
-parser.add_argument('--batch_size', type=int, default=64)
+# parser.add_argument('--batch_size', type=int, default=64)
 parser.add_argument('--num_epochs', type=int, default=200)
 parser.add_argument('--learning_rate', type=float, default=1e-3)
 parser.add_argument('--patches', type=int, default=5)
@@ -19,6 +19,7 @@ parser.add_argument('--band_patch', type=int, default=9)
 
 parser.add_argument("--wandb_mode", default="online", choices=["online", "offline", "disabled"])
 parser.add_argument('--project_name', type=str, default='Quantization Study')
+
 # parser.add_argument
 
 
@@ -30,7 +31,7 @@ parser.add_argument('--type', type=str, default='none')
 
 # training parameter
 parser.add_argument('--batch_size', type=int, default=512)
-parser.add_argument('--epoch', type=int, default=190)
+parser.add_argument('--epoch', type=int, default=100)
 parser.add_argument('--lr', type=float, default=5e-4)
 parser.add_argument('--drop_rate', type=float, default=0.0)
 parser.add_argument('--lr_decay', type=float, default=0.5)
