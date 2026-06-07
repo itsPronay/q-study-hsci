@@ -112,7 +112,7 @@ def run(args):
         true_cla, overall_accuracy, average_accuracy, kappa, cm, test_pred= test_batch(model.eval(), image, index, 400,  nTrain_perClass, nvalid_perClass, halfsize)
         toc2 = time.time()
         
-        classification_map, gt_map = generate(image, gt, index, nTrain_perClass, nvalid_perClass, test_pred, overall_accuracy, halfsize, args.dataset, day_str, args.num, net_name)
+        classification_map, gt_map = generate(image, gt, index, nTrain_perClass, nvalid_perClass, test_pred, overall_accuracy, halfsize, args.dataset, day_str, num, net_name)
         result[:nclass,num] = true_cla
         result[nclass,num] = overall_accuracy
         result[nclass+1,num] = average_accuracy
@@ -127,7 +127,7 @@ def run(args):
         TESTING_TIME.append(toc2 - toc1)
         ELEMENT_ACC = np.array(AC)
         
-    # wriut code to get standard deviation here 
+    # wriut code to get standard deviation here if needed
 
     
     if not os.path.exists('record'):
