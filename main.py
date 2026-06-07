@@ -54,6 +54,8 @@ parser.add_argument('--use_fu', default=True, type=lambda x: (str(x).lower() == 
 args = parser.parse_args()
 
 def main():
+    if not os.path.exists('classification_maps'):
+        os.makedirs('classification_maps')
     # wandb.init(
     #     project = args.project_name,
     #     # name = f"Input shape: {shape}, Device: {args.ai_hub_device}, mode: {args.mode}",
