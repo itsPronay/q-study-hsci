@@ -10,27 +10,32 @@ from spectralSpacialMamba.run import run as run_mamba
 parser = argparse.ArgumentParser(description='SpectralFormer')
 parser.add_argument('--model', type=str,choices=['SpectralFormer', 'SpectralSpacialMamba'], default='SpectralSpacialMamba')
 parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'P', 'Houston'], default='UP')
-parser.add_argument('--group_size', type=int, default=145)
+# parser.add_argument('--group_size', type=int, default=145)
 # parser.add_argument('--batch_size', type=int, default=64)
-parser.add_argument('--num_epochs', type=int, default=200)
+parser.add_argument('--num_epochs', type=int, default=100)
 parser.add_argument('--learning_rate', type=float, default=1e-3)
 parser.add_argument('--patches', type=int, default=5)
 parser.add_argument('--band_patch', type=int, default=9)
 
+# wandb args
 parser.add_argument("--wandb_mode", default="online", choices=["online", "offline", "disabled"])
 parser.add_argument('--project_name', type=str, default='Quantization Study')
 
-# parser.add_argument
-
+# quantization specific args
+parser.add_argument('--nbits', type=int, default=8)
+parser.add_argument('--group_size', type=int, default=64)
+parser.add_argument('--del_orig', action='store_true', help='if True, delete the original Linear weight inside HQQLinear')
+parser.add_argument('--verbose', action='store_true', help='if True, print replacement information')
+parser.add_argument('--exclude_names', nargs='*', default=[], help='List of module names to exclude from quantization, e.g., "blocks.11.mlp.fc1 blocks.11.mlp.fc2"')
 
 # these are the args for spectralformer specifically, 
 # Pre training
 parser.add_argument('--train_num', type=int, default=20)
 parser.add_argument('--train_loop', type=int, default=1)
-parser.add_argument('--windowsize', type=int, default=27)
+parser.add_argument('--windowsize', type=int, default=27) # 13 * 2 + 1 = 27
 parser.add_argument('--type', type=str, default='none')
 
-# training parameter
+# training parameter for mamba
 parser.add_argument('--batch_size', type=int, default=512)
 parser.add_argument('--epoch', type=int, default=100)
 parser.add_argument('--lr', type=float, default=5e-4)

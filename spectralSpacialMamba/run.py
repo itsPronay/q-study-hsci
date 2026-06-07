@@ -15,6 +15,15 @@ from .generate_pic import generate
 from spectralSpacialMamba.utils import tr_acc, test_batch, record_output
 from spectralSpacialMamba.utils import saveModel 
 from .model import mamba_1D_model, mamba_2D_model, mamba_SS_model
+from .quantize_mamba import test_batch_quantized
+
+def getClassOutput(true_cla, is_quantized=False):
+    class_names = [f"class_{i}" for i in range(len(true_cla))]
+    if is_quantized:
+        per_class_dict = {f"each_acc/class_no{class_names[i]}": true_cla[i] for i in range(len(true_cla))}
+    else:
+        per_class_dict = {f"q_each_acc/class_no{class_names[i]}": true_cla[i] for i in range(len(true_cla))}
+    return per_class_dict
 
 def run(args):
     day = datetime.datetime.now()
@@ -64,7 +73,6 @@ def run(args):
         validation_image = np.transpose(validation_image,(0,3,1,2))
         nvalid_perClass = np.zeros_like(nvalid_perClass)
         
-
         if model_id == 0:
             model = mamba_1D_model(img_size=(spe_windowsize,spe_windowsize), spa_img_size=(windowsize, windowsize), nband=nband, patch_size=spe_patch_size, embed_dim=embed_dim, nclass=nclass, depth=depth, bi=use_bi, norm_layer=nn.LayerNorm, global_pool=use_global, cls = use_cls)
         elif model_id == 1:
@@ -109,10 +117,14 @@ def run(args):
         toc1 = time.time()
       
 
-        true_cla, overall_accuracy, average_accuracy, kappa, cm, test_pred= test_batch(model.eval(), image, index, 400,  nTrain_perClass, nvalid_perClass, halfsize)
+        true_cla, overall_accuracy, average_accuracy, kappa, cm, test_pred= test_batch(model.eval(), image, index, args.batch_size,  nTrain_perClass, nvalid_perClass, halfsize)
         toc2 = time.time()
+
+        true_cla_quantized, overall_accuracy_quantized, average_accuracy_quantized, kappa_quantized, cm_quantized, test_pred_quantized= test_batch_quantized(model.eval(), image, index, args.batch_size,  nTrain_perClass, nvalid_perClass, halfsize)
         
         classification_map, gt_map = generate(image, gt, index, nTrain_perClass, nvalid_perClass, test_pred, overall_accuracy, halfsize, args.dataset, day_str, num, net_name)
+        classification_map_quantized, gt_map_quantized = generate(image, gt, index, nTrain_perClass, nvalid_perClass, test_pred_quantized, overall_accuracy_quantized, halfsize, args.dataset, day_str+'_quantized', num, net_name+'_quantized')
+
         result[:nclass,num] = true_cla
         result[nclass,num] = overall_accuracy
         result[nclass+1,num] = average_accuracy
@@ -136,21 +148,36 @@ def run(args):
         
     record_output(OA, AA, KA, ELEMENT_ACC, CM, TRAINING_TIME, TESTING_TIME, './record/' + net_name +'_'+ day_str + '_' +args.dataset+'_'+str(train_image.shape[0])+ '_epoch_' + str(args.epoch)+ '_spa_patch_size_' +str(spa_patch_size) +'_spe_patch_size_'+str(spe_patch_size) + '_embed_dim_'+str(embed_dim)+'_depth _'+str(depth)+ '_use_global_'+str(use_global) +'_use_bi _'+str(use_bi)+'_hdi_chans_'+str(hid_chans)+'_lr _'+str(lr)+'_lrdecay_'+str(gamma)+ '_fusion_'+str(args.use_fu) + '_end.txt') 
     
+
+    # #
+    # make sure if we should log element accuracy or not
+    #
     output = {
         'model' : 'SpectralSpacialMamba',
         'dataset' : args.dataset,
         'epochs' : str(args.epoch),
-        'overall_accuracy' : OA,
-        'average_accuracy' : AA,
-        'kappa' : KA,
-        'element_acc' : ELEMENT_ACC,
-        'training_time' : TRAINING_TIME,
-        'testing_time' : TESTING_TIME,
+        'overall_accuracy' : str(overall_accuracy),
+        'average_accuracy' : str(average_accuracy),
+        'kappa' : str(kappa),
+        # 'element_acc' : ELEMENT_ACC, 
+        'average_accuracy_quantized' : str(average_accuracy_quantized),
+        'overall_accuracy_quantized' : str(overall_accuracy_quantized),
+        'kappa_quantized' : str(kappa_quantized),
+        **getClassOutput(true_cla),
+        **getClassOutput(true_cla_quantized, is_quantized=True),
+        
+        # 'element_acc_quantized' : true_cla_quantized,
+        # 'training_time' : TRAINING_TIME,
+        # 'testing_time' : TESTING_TIME,
+
     }
 
-    wandb.log(
-        
-    )
+    for key, value in output.items():
+        print(f"{key}: {value}")
+
+    if args.wandb_mode != 'disabled':
+        wandb.log(output)
+        wandb.finish()
 
     # Save the model
     saveModel(model, net_name='SpectralSpacialMamba', dataset=args.dataset, run_num=args.num, path='saved_models')
