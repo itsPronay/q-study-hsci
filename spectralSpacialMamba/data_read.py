@@ -22,9 +22,9 @@ def load_data(dataset):
     image = image.astype(np.float32)
     return image, label
 
-def readdata(args, dataset, num):
+def readdata(args):
 
-    or_image, or_label = load_data(dataset)
+    or_image, or_label = load_data(args.dataset)
     windowsize = args.windowsize
     train_num = args.train_num
     halfsize = int((windowsize-1)/2)
@@ -84,7 +84,7 @@ def readdata(args, dataset, num):
         matrix = np.zeros([len(temprow),2], dtype=np.int64)
         matrix[:,0] = temprow
         matrix[:,1] = tempcol
-        np.random.seed(num)
+        np.random.seed(args.num)
         np.random.shuffle(matrix)
 
         temprow = matrix[:,0]

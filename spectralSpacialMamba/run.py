@@ -16,43 +16,7 @@ from spectralSpacialMamba.utils import tr_acc, test_batch, record_output
 from spectralSpacialMamba.utils import saveModel 
 from .model import mamba_1D_model, mamba_2D_model, mamba_SS_model
 
-
-parser = argparse.ArgumentParser()
-
-# Pre training
-parser.add_argument('--train_num', type=int, default=20)
-parser.add_argument('--windowsize', type=int, default=27)
-parser.add_argument('--type', type=str, default='none')
-
-# training parameter
-parser.add_argument('--batch_size', type=int, default=512)
-parser.add_argument('--epoch', type=int, default=190)
-parser.add_argument('--lr', type=float, default=5e-4)
-parser.add_argument('--drop_rate', type=float, default=0.0)
-parser.add_argument('--lr_decay', type=float, default=0.5)
-
-# model parameter
-parser.add_argument('--model_id', type=int, default=2,
-                    help='0: 1D, 1: 2D, 2: SS')
-
-parser.add_argument('--spe_windowsize', type=int, default=3)
-parser.add_argument('--spa_patch_size', type=int, default=3)
-parser.add_argument('--spe_patch_size', type=int, default=2)
-parser.add_argument('--hid_chans', type=int, default=64)
-parser.add_argument('--embed_dim', type=int, default=64)
-parser.add_argument('--depth', type=int, default=4)
-
-parser.add_argument('--use_bi', default=True, type=lambda x: (str(x).lower() == 'true'), help='use bidirection or not' )  
-parser.add_argument('--use_global', default=True, type=bool,
-                    help='use token meaning or not') 
-parser.add_argument('--use_cls', default=True, type=bool,
-                    help='use class tken or not') 
-parser.add_argument('--use_fu', default=True, type=lambda x: (str(x).lower() == 'true'),
-                    help='use center augmentation fusion or not') 
-    
-args = parser.parse_args()
-
-def run(dataset, epoch):
+def run(args):
     day = datetime.datetime.now()
     day_str = day.strftime('%m_%d_%H_%M')
 
@@ -80,7 +44,7 @@ def run(dataset, epoch):
     use_cls = args.use_cls
 
     halfsize = int((windowsize-1)/2)
-    train_image, train_label, validation_image, validation_label,nTrain_perClass, nvalid_perClass, index,image, gt,s = readdata(args, dataset, 0)
+    train_image, train_label, validation_image, validation_label,nTrain_perClass, nvalid_perClass, index,image, gt,s = readdata(args, 0)
     gt = gt.astype(np.int32)
     nclass = np.max(gt)
     result = np.zeros([nclass+3, num_of_ex])
