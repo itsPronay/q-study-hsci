@@ -20,7 +20,7 @@ def run(args):
     day = datetime.datetime.now()
     day_str = day.strftime('%m_%d_%H_%M')
 
-    num_of_ex = 10
+    num_of_ex = args.train_loop
     windowsize = args.windowsize
     type = args.type
 

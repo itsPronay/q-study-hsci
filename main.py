@@ -26,6 +26,7 @@ parser.add_argument('--project_name', type=str, default='Quantization Study')
 # these are the args for spectralformer specifically, 
 # Pre training
 parser.add_argument('--train_num', type=int, default=20)
+parser.add_argument('--train_loop', type=int, default=1)
 parser.add_argument('--windowsize', type=int, default=27)
 parser.add_argument('--type', type=str, default='none')
 
