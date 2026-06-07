@@ -112,7 +112,7 @@ def run(args):
         true_cla, overall_accuracy, average_accuracy, kappa, cm, test_pred= test_batch(model.eval(), image, index, 400,  nTrain_perClass, nvalid_perClass, halfsize)
         toc2 = time.time()
         
-        classification_map, gt_map = generate(image, gt, index, nTrain_perClass, nvalid_perClass, test_pred, overall_accuracy, halfsize, args.dataset, args.day_str, args.num, net_name)
+        classification_map, gt_map = generate(image, gt, index, nTrain_perClass, nvalid_perClass, test_pred, overall_accuracy, halfsize, args.dataset, day_str, args.num, net_name)
         result[:nclass,num] = true_cla
         result[nclass,num] = overall_accuracy
         result[nclass+1,num] = average_accuracy
@@ -132,9 +132,9 @@ def run(args):
     
     if not os.path.exists('record'):
         os.makedirs('record')
-    np.save('record/'+ net_name +'_'+ args.day_str + '_' +args.dataset+'_'+str(train_image.shape[0]) + '_epoch_' + str(args.epoch) + '_spa_patch_size_' + str(spa_patch_size) +'_spe_patch_size_'+str(spe_patch_size) + '_embed_dim_'+str(embed_dim)+'_depth _'+str(depth)+ '_use_global_'+str(use_global) +'_use_bi _'+str(use_bi)+'_hdi_chans_'+str(hid_chans)+'_lr _'+str(lr)+'_lrdecay_'+str(gamma)+ '_fusion_'+str(args.use_fu) +'_.npy', result)
+    np.save('record/'+ net_name +'_'+ day_str + '_' +args.dataset+'_'+str(train_image.shape[0]) + '_epoch_' + str(args.epoch) + '_spa_patch_size_' + str(spa_patch_size) +'_spe_patch_size_'+str(spe_patch_size) + '_embed_dim_'+str(embed_dim)+'_depth _'+str(depth)+ '_use_global_'+str(use_global) +'_use_bi _'+str(use_bi)+'_hdi_chans_'+str(hid_chans)+'_lr _'+str(lr)+'_lrdecay_'+str(gamma)+ '_fusion_'+str(args.use_fu) +'_.npy', result)
         
-    record_output(OA, AA, KA, ELEMENT_ACC, CM, TRAINING_TIME, TESTING_TIME, './record/' + net_name +'_'+ args.day_str + '_' +args.dataset+'_'+str(train_image.shape[0])+ '_epoch_' + str(args.epoch)+ '_spa_patch_size_' +str(spa_patch_size) +'_spe_patch_size_'+str(spe_patch_size) + '_embed_dim_'+str(embed_dim)+'_depth _'+str(depth)+ '_use_global_'+str(use_global) +'_use_bi _'+str(use_bi)+'_hdi_chans_'+str(hid_chans)+'_lr _'+str(lr)+'_lrdecay_'+str(gamma)+ '_fusion_'+str(args.use_fu) + '_end.txt') 
+    record_output(OA, AA, KA, ELEMENT_ACC, CM, TRAINING_TIME, TESTING_TIME, './record/' + net_name +'_'+ day_str + '_' +args.dataset+'_'+str(train_image.shape[0])+ '_epoch_' + str(args.epoch)+ '_spa_patch_size_' +str(spa_patch_size) +'_spe_patch_size_'+str(spe_patch_size) + '_embed_dim_'+str(embed_dim)+'_depth _'+str(depth)+ '_use_global_'+str(use_global) +'_use_bi _'+str(use_bi)+'_hdi_chans_'+str(hid_chans)+'_lr _'+str(lr)+'_lrdecay_'+str(gamma)+ '_fusion_'+str(args.use_fu) + '_end.txt') 
     
     output = {
         'model' : 'SpectralSpacialMamba',
