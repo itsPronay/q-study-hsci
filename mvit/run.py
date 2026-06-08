@@ -141,6 +141,7 @@ def run_mvit(args):
     print("**************************************************")
 
     print("started testing")
+    model.load_state_dict(torch.load(path))
     model.eval()
 
     # test model before quantizing
