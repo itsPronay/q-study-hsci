@@ -4,7 +4,7 @@ import argparse
 import wandb
 import os 
 import scipy.io as sio
-from spectralFormer.train import run as run_spectralformer
+# from spectralFormer.train import run as run_spectralformer
 from spectralSpacialMamba.run import run as run_mamba
 from mvit.run import run_mvit
 
@@ -89,7 +89,7 @@ def main():
 
     if args.model == 'SpectralFormer':
         # print('Training SpectralFormer...')
-        run_spectralformer(args)
+        # run_spectralformer(args)
     elif args.model == 'SpectralSpacialMamba':
         run_mamba(args)
     elif args.model == 'mvit':
