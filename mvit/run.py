@@ -42,9 +42,18 @@ from .utils import class_accuracy_percent
 
 
 def run_mvit(args):
+    seed = getattr(args, 'seed', 0)
+    train_num = getattr(args, 'train_num', 20)
+    patch_size = getattr(args, 'patch_size_mvit', 15)
+    batch_size = getattr(args, 'batch_size_mvit', 30)
+    gamma = getattr(args, 'gamma_mvit', 0.99)
+    epoches = getattr(args, 'epoches', getattr(args, 'num_epochs', 100))
+    learning_rate = getattr(args, 'learning_rate_mvit', getattr(args, 'learning_rate', 1e-3))
+    weight_decay = getattr(args, 'weight_decay_mvit', 0.0)
+
     # Load data
     data, label = downloadAndLoadDataset(args.dataset)
-    num_classes = np.max(label)
+    num_classes = int(np.max(label))
 
     # Preprocess data
 
@@ -63,11 +72,15 @@ def run_mvit(args):
     height, width, band = data.shape
     print("height={0}, width={1}, band={2}".format(height, width, band))
 
-    mirror_data = mirror_hsi(height, width, band, data, patch_size=args.patch_size_mvit)
+    mirror_data = mirror_hsi(height, width, band, data, patch_size=patch_size)
 
-    total_pos_train, total_pos_test, total_pos_valid, number_train, number_test, number_valid = choose_train_and_test(label, args.train_num, args.seed) 
+    total_pos_train, total_pos_test, total_pos_valid, number_train, number_test, number_valid = choose_train_and_test(
+        label, num_train_per_class=train_num, seed=seed
+    )
 
-    x_train, x_test, x_valid = train_and_test_data(mirror_data, band, total_pos_train, total_pos_test, total_pos_valid, args.patch_size_mvit)
+    x_train, x_test, x_valid = train_and_test_data(
+        mirror_data, band, total_pos_train, total_pos_test, total_pos_valid, patch_size
+    )
     y_train, y_test, y_valid = train_and_test_label(number_train, number_test, number_valid, num_classes)
 
     # load data
@@ -86,21 +99,24 @@ def run_mvit(args):
     y_valid = torch.from_numpy(y_valid).type(torch.LongTensor)
     valid_label = Data.TensorDataset(x_valid, y_valid)
 
-    train_loader = Data.DataLoader(train_label, batch_size=args.batch_size, shuffle=True)
-    test_loader = Data.DataLoader(test_label, batch_size=args.batch_size, shuffle=True)
-    valid_loader = Data.DataLoader(valid_label, batch_size=args.batch_size, shuffle=True)
+    train_loader = Data.DataLoader(train_label, batch_size=batch_size, shuffle=True)
+    test_loader = Data.DataLoader(test_label, batch_size=batch_size, shuffle=True)
+    valid_loader = Data.DataLoader(valid_label, batch_size=batch_size, shuffle=True)
 
     model = MViT(num_classes=num_classes).cuda()
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=0)
-    scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=args.gamma)
+    optimizer = optim.Adam(
+        model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=weight_decay
+    )
+    scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=gamma)
 
     print('start training')
     acc_list = [0.00]
+    os.makedirs('./model', exist_ok=True)
     path = './model/mvit.pt'
     tic = time.time()
-    for epoch in range(args.epoches):
+    for epoch in range(epoches):
         # 计算的是移动平均准确率
         train_acc, train_loss = train(model, train_loader, criterion, optimizer)
         valid_acc, valid_loss = valid(model, valid_loader, criterion)
@@ -124,7 +140,7 @@ def run_mvit(args):
     model.eval()
 
     test_tar, test_pre = test(model, test_loader)
-    OA, AA_mean, kappa, AA = output_metric(test_tar, test_pre, num_classes)
+    OA, AA_mean, kappa, AA = output_metric(test_tar, test_pre)
     print("OA: {:.4f}, AA: {:.4f}, Kappa: {:.4f}".format(OA, AA_mean, kappa))
     per_class_acc = class_accuracy_percent(test_tar, test_pre, num_classes)
     for c in range(num_classes):

@@ -9,7 +9,8 @@ from spectralSpacialMamba.run import run as run_mamba
 from mvit.run import run_mvit
 
 
-parser = argparse.ArgumentParser(description='SpectralFormer')
+parser = argparse.ArgumentParser(description='Study quantization of different models on hyperspectral image classification')
+
 parser.add_argument('--model', type=str,choices=['SpectralFormer', 'SpectralSpacialMamba', 'mvit'], default='SpectralSpacialMamba')
 parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'Pavia', 'Indian'], default='UP')
 # parser.add_argument('--group_size', type=int, default=145)
@@ -19,7 +20,9 @@ parser.add_argument('--learning_rate', type=float, default=1e-3)
 parser.add_argument('--patches', type=int, default=5)
 parser.add_argument('--band_patch', type=int, default=9)
 parser.add_argument('--train_num', type=int, default=20)
+parser.add_argument('--seed', type=int, default=0, help='random seed for train/test split')
 parser.add_argument('--batch_size', type=int, default=512)
+parser.add_argument('--batch_size_mvit', type=int, default=30, help='batch size for MViT')
 # wandb args
 parser.add_argument("--wandb_mode", default="online", choices=["online", "offline", "disabled"])
 parser.add_argument('--project_name', type=str, default='Quantization Study')

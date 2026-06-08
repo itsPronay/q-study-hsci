@@ -6,6 +6,7 @@ import matplotlib as mpl
 from matplotlib import colors
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
+from sklearn.decomposition import PCA
 
 # apply pca
 def applyPCA(data, numComponents=30):
