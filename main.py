@@ -6,9 +6,11 @@ import os
 import scipy.io as sio
 from spectralFormer.train import run as run_spectralformer
 from spectralSpacialMamba.run import run as run_mamba
+from mvit.run import run_mvit
+
 
 parser = argparse.ArgumentParser(description='SpectralFormer')
-parser.add_argument('--model', type=str,choices=['SpectralFormer', 'SpectralSpacialMamba'], default='SpectralSpacialMamba')
+parser.add_argument('--model', type=str,choices=['SpectralFormer', 'SpectralSpacialMamba', 'mvit'], default='SpectralSpacialMamba')
 parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'Pavia', 'Indian'], default='UP')
 # parser.add_argument('--group_size', type=int, default=145)
 # parser.add_argument('--batch_size', type=int, default=64)
@@ -83,12 +85,12 @@ def main():
     # )
 
     if args.model == 'SpectralFormer':
-        print('Training SpectralFormer...')
+        # print('Training SpectralFormer...')
         run_spectralformer(args)
     elif args.model == 'SpectralSpacialMamba':
         run_mamba(args)
     elif args.model == 'mvit':
-        print('Training mvit...')
+        run_mvit(args)
     else:
         raise ValueError(f"Unknown model: {args.model}")
 
