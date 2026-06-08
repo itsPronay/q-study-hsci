@@ -37,7 +37,7 @@ from .utils import ActivationOutputData
 from download_dataset import downloadAndLoadDataset
 from .model import MViT
 from .utils import class_accuracy_percent
-
+from .quantize_mvit import test_batch_quantized
 # %matplotlib inline
 
 
@@ -139,12 +139,28 @@ def run_mvit(args):
     print("started testing")
     model.eval()
 
+    # test model before quantizing
     test_tar, test_pre = test(model, test_loader)
     OA, AA_mean, kappa, AA = output_metric(test_tar, test_pre)
+
+    #print details
     print("OA: {:.4f}, AA: {:.4f}, Kappa: {:.4f}".format(OA, AA_mean, kappa))
     per_class_acc = class_accuracy_percent(test_tar, test_pre, num_classes)
     for c in range(num_classes):
-        print("Class {}: {:.4f}%".format(c, per_class_acc[c]))
+        print("Class {}: {:.4f}%".format(c + 1, per_class_acc[c]))
+
+    # quantize model and test 
+    quantized_model = test_batch_quantized(args, model)
+    test_tar_quantized, test_pre_quantized = test(quantized_model, test_loader)
+    OA_quantized, AA_mean_quantized, kappa_quantized, AA_quantized = output_metric(test_tar_quantized, test_pre_quantized)
+
+    #Print details
+    print("Quantized model - OA: {:.4f}, AA: {:.4f}, Kappa: {:.4f}".format(OA_quantized, AA_mean_quantized, kappa_quantized))
+    per_class_acc_quantized = class_accuracy_percent(test_tar_quantized, test_pre_quantized, num_classes)
+    for c in range(num_classes):
+        print("Quantized model - Class {}: {:.4f}%".format(c + 1, per_class_acc_quantized[c]))
+    
+
 
     # output = {
     #     'model' : 'MViT',
