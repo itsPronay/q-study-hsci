@@ -21,7 +21,7 @@ def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass,
         exclude_names = args.exclude_names,
     )
 
-    model.evail()
+    model.eval()
 
     true_cla_q, oa_q, aa_q, kappa_q, cm_q, pred_q = test_batch(
         model, image, index, BATCH_SIZE, nTrain_perClass, nvalid_perClass, halfsize
