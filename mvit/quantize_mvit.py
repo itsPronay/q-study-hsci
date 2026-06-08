@@ -3,9 +3,12 @@ from hqq.core.quantize import BaseQuantizeConfig
 import hqq_wrapper
 from spectralSpacialMamba.utils import test_batch
 import numpy as np
-
+from spectralSpacialMamba.quantize_mamba import getParamCount
 
 def test_batch_quantized(args, model):
+
+    getParamCount(model, printLayers=True)
+    
     # getParamCount(model, printLayers=True)        
     quant_config = BaseQuantizeConfig(
         nbits=args.nbits,
