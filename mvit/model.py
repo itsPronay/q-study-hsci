@@ -66,7 +66,9 @@ class MViT(nn.Module):
         pos_embed = get_2d_sincos_pos_embed(dim, 11, cls_token=True) 
         self.pos_embed.data.copy_(torch.from_numpy(pos_embed).float().unsqueeze(0))
 
-        self.blocks = nn.ModuleList([Block(dim, heads, qkv_bias=True, attn_drop=0.1, drop=0.1) for _ in range(depth)])
+        # removed drop cause getting the folling error
+        #TypeError: Block.__init__() got an unexpected keyword argument 'drop'
+        self.blocks = nn.ModuleList([Block(dim, heads, qkv_bias=True, attn_drop=0.1) for _ in range(depth)])
 
         self.norm = nn.LayerNorm(dim)
         
