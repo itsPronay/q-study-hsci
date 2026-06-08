@@ -7,8 +7,9 @@ from scipy.io import loadmat
 from scipy.io import savemat
 from torch import optim
 from torch.autograd import Variable
-from vit_pytorch import ViT
+from .vit_pytorch import ViT
 from sklearn.metrics import confusion_matrix
+from download_dataset import downloadAndLoadDataset
 
 import matplotlib.pyplot as plt
 from matplotlib import colors
@@ -17,7 +18,8 @@ import time
 import os
 
 parser = argparse.ArgumentParser("HSI")
-parser.add_argument('--dataset', choices=['Indian', 'Pavia', 'Houston'], default='Indian', help='dataset to use')
+parser.add_argument('--dataset', choices=['UP', 'NF', 'HC', 'Pavia', 'Indian'], default='UP', help='dataset to use')
+parser.add_argument('--train_num', type=int, default=20, help='number of training samples per class')
 parser.add_argument('--flag_test', choices=['test', 'train'], default='train', help='testing mark')
 parser.add_argument('--mode', choices=['ViT', 'CAF'], default='ViT', help='mode choice')
 parser.add_argument('--gpu_id', default='0', help='gpu id')
@@ -34,45 +36,43 @@ args = parser.parse_args()
 
 os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
 #-------------------------------------------------------------------------------
-# 定位训练和测试样本
-def chooose_train_and_test_point(train_data, test_data, true_data, num_classes):
+# Split labeled pixels into train/test with a fixed number of samples per class
+def choose_train_and_test_from_gt(groundtruth, num_train_per_class=20, seed=0):
+    rs = np.random.RandomState(seed)
+    num_classes = int(np.max(groundtruth))
     number_train = []
     pos_train = {}
     number_test = []
     pos_test = {}
     number_true = []
     pos_true = {}
-    #-------------------------for train data------------------------------------
+
     for i in range(num_classes):
-        each_class = []
-        each_class = np.argwhere(train_data==(i+1))
-        number_train.append(each_class.shape[0])
-        pos_train[i] = each_class
+        each_class = np.argwhere(groundtruth == (i + 1))
+        rs.shuffle(each_class)
+        n_train = min(num_train_per_class, each_class.shape[0])
+        pos_train[i] = each_class[:n_train]
+        number_train.append(n_train)
+        pos_test[i] = each_class[n_train:]
+        number_test.append(pos_test[i].shape[0])
 
     total_pos_train = pos_train[0]
     for i in range(1, num_classes):
-        total_pos_train = np.r_[total_pos_train, pos_train[i]] #(695,2)
+        total_pos_train = np.r_[total_pos_train, pos_train[i]]
     total_pos_train = total_pos_train.astype(int)
-    #--------------------------for test data------------------------------------
-    for i in range(num_classes):
-        each_class = []
-        each_class = np.argwhere(test_data==(i+1))
-        number_test.append(each_class.shape[0])
-        pos_test[i] = each_class
 
     total_pos_test = pos_test[0]
     for i in range(1, num_classes):
-        total_pos_test = np.r_[total_pos_test, pos_test[i]] #(9671,2)
+        total_pos_test = np.r_[total_pos_test, pos_test[i]]
     total_pos_test = total_pos_test.astype(int)
-    #--------------------------for true data------------------------------------
-    for i in range(num_classes+1):
-        each_class = []
-        each_class = np.argwhere(true_data==i)
+
+    for i in range(num_classes + 1):
+        each_class = np.argwhere(groundtruth == i)
         number_true.append(each_class.shape[0])
         pos_true[i] = each_class
 
     total_pos_true = pos_true[0]
-    for i in range(1, num_classes+1):
+    for i in range(1, num_classes + 1):
         total_pos_true = np.r_[total_pos_true, pos_true[i]]
     total_pos_true = total_pos_true.astype(int)
 
@@ -294,7 +294,20 @@ def cal_results(matrix):
     Kappa = (OA - pe) / (1 - pe)
     return OA, AA_mean, Kappa, AA
 
-def run_model_training(seed, data, label):
+def run(args):
+    seed = getattr(args, 'seed', 0)
+    train_num = getattr(args, 'train_num', 20)
+    epoches = getattr(args, 'epoches', getattr(args, 'num_epochs', 300))
+    band_patches = getattr(args, 'band_patches', getattr(args, 'band_patch', 1))
+    flag_test = getattr(args, 'flag_test', 'train')
+    mode = getattr(args, 'mode', 'ViT')
+    test_freq = getattr(args, 'test_freq', 5)
+    gamma = getattr(args, 'gamma', 0.9)
+    weight_decay = getattr(args, 'weight_decay', 0)
+    learning_rate = getattr(args, 'learning_rate', 5e-4)
+    batch_size = getattr(args, 'batch_size', 64)
+    patches = getattr(args, 'patches', 1)
+
     #-------------------------------------------------------------------------------
     # Parameter Setting
     np.random.seed(seed)
@@ -304,37 +317,36 @@ def run_model_training(seed, data, label):
     cudnn.benchmark = False
 
     # prepare data
-    if args.dataset == 'Indian':
-        data = loadmat('./data/IndianPine.mat')
-    elif args.dataset == 'Pavia':
-        data = loadmat('./data/Pavia.mat')
-    elif args.dataset == 'Houston':
-        data = loadmat('./data/Houston.mat')
-    else:
-        raise ValueError("Unkknow dataset")
-    color_mat = loadmat('./data/AVIRIS_colormap.mat')
-    TR = data['TR']
-    TE = data['TE']
-    input = data['input'] #(145,145,200)
-    label = TR + TE
-    num_classes = np.max(TR)
+    input_data, label_gt = downloadAndLoadDataset(args.dataset)
+    num_classes = int(np.max(label_gt))
 
-    color_mat_list = list(color_mat)
-    color_matrix = color_mat[color_mat_list[3]] #(17,3)
+    color_matrix = None
+    colormap_path = './data/AVIRIS_colormap.mat'
+    if os.path.exists(colormap_path):
+        color_mat = loadmat(colormap_path)
+        color_mat_list = list(color_mat)
+        color_matrix = color_mat[color_mat_list[3]]
+
     # normalize data by band norm
-    input_normalize = np.zeros(input.shape)
-    for i in range(input.shape[2]):
-        input_max = np.max(input[:,:,i])
-        input_min = np.min(input[:,:,i])
-        input_normalize[:,:,i] = (input[:,:,i]-input_min)/(input_max-input_min)
+    input_normalize = np.zeros(input_data.shape)
+    for i in range(input_data.shape[2]):
+        input_max = np.max(input_data[:, :, i])
+        input_min = np.min(input_data[:, :, i])
+        input_normalize[:, :, i] = (input_data[:, :, i] - input_min) / (input_max - input_min)
     # data size
-    height, width, band = input.shape
+    height, width, band = input_data.shape
     print("height={0},width={1},band={2}".format(height, width, band))
+    print("train samples per class: {}".format(train_num))
     #-------------------------------------------------------------------------------
     # obtain train and test data
-    total_pos_train, total_pos_test, total_pos_true, number_train, number_test, number_true = chooose_train_and_test_point(TR, TE, label, num_classes)
-    mirror_image = mirror_hsi(height, width, band, input_normalize, patch=args.patches)
-    x_train_band, x_test_band, x_true_band = train_and_test_data(mirror_image, band, total_pos_train, total_pos_test, total_pos_true, patch=args.patches, band_patch=args.band_patches)
+    total_pos_train, total_pos_test, total_pos_true, number_train, number_test, number_true = choose_train_and_test_from_gt(
+        label_gt, num_train_per_class=train_num, seed=seed
+    )
+    mirror_image = mirror_hsi(height, width, band, input_normalize, patch=patches)
+    x_train_band, x_test_band, x_true_band = train_and_test_data(
+        mirror_image, band, total_pos_train, total_pos_test, total_pos_true,
+        patch=patches, band_patch=band_patches
+    )
     y_train, y_test, y_true = train_and_test_label(number_train, number_test, number_true, num_classes)
     #-------------------------------------------------------------------------------
     # load data
@@ -348,15 +360,15 @@ def run_model_training(seed, data, label):
     y_true=torch.from_numpy(y_true).type(torch.LongTensor)
     Label_true=Data.TensorDataset(x_true,y_true)
 
-    label_train_loader=Data.DataLoader(Label_train,batch_size=args.batch_size,shuffle=True)
-    label_test_loader=Data.DataLoader(Label_test,batch_size=args.batch_size,shuffle=True)
+    label_train_loader=Data.DataLoader(Label_train,batch_size=batch_size,shuffle=True)
+    label_test_loader=Data.DataLoader(Label_test,batch_size=batch_size,shuffle=True)
     label_true_loader=Data.DataLoader(Label_true,batch_size=100,shuffle=False)
 
     #-------------------------------------------------------------------------------
     # create model
     model = ViT(
-        image_size = args.patches,
-        near_band = args.band_patches,
+        image_size = patches,
+        near_band = band_patches,
         num_patches = band,
         num_classes = num_classes,
         dim = 64,
@@ -365,21 +377,21 @@ def run_model_training(seed, data, label):
         mlp_dim = 8,
         dropout = 0.1,
         emb_dropout = 0.1,
-        mode = args.mode
+        mode = mode
     )
     model = model.cuda()
     # criterion
     criterion = nn.CrossEntropyLoss().cuda()
     # optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.epoches//10, gamma=args.gamma)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=max(epoches // 10, 1), gamma=gamma)
     #-------------------------------------------------------------------------------
-    if args.flag_test == 'test':
-        if args.mode == 'ViT':
+    if flag_test == 'test':
+        if mode == 'ViT':
             model.load_state_dict(torch.load('./ViT.pt'))      
-        elif (args.mode == 'CAF') & (args.patches == 1):
+        elif (mode == 'CAF') & (patches == 1):
             model.load_state_dict(torch.load('./SpectralFormer_pixel.pt'))
-        elif (args.mode == 'CAF') & (args.patches == 7):
+        elif (mode == 'CAF') & (patches == 7):
             model.load_state_dict(torch.load('./SpectralFormer_patch.pt'))
         else:
             raise ValueError("Wrong Parameters") 
@@ -393,15 +405,18 @@ def run_model_training(seed, data, label):
         for i in range(total_pos_true.shape[0]):
             prediction_matrix[total_pos_true[i,0], total_pos_true[i,1]] = pre_u[i] + 1
         plt.subplot(1,1,1)
-        plt.imshow(prediction_matrix, colors.ListedColormap(color_matrix))
+        if color_matrix is not None:
+            plt.imshow(prediction_matrix, colors.ListedColormap(color_matrix))
+        else:
+            plt.imshow(prediction_matrix)
         plt.xticks([])
         plt.yticks([])
         plt.show()
-        savemat('matrix.mat',{'P':prediction_matrix, 'label':label})
-    elif args.flag_test == 'train':
+        savemat('matrix.mat', {'P': prediction_matrix, 'label': label_gt})
+    elif flag_test == 'train':
         print("start training")
         tic = time.time()
-        for epoch in range(args.epoches): 
+        for epoch in range(epoches): 
             scheduler.step()
 
             # train model
@@ -412,7 +427,7 @@ def run_model_training(seed, data, label):
                             .format(epoch+1, train_obj, train_acc))
             
 
-            if (epoch % args.test_freq == 0) | (epoch == args.epoches - 1):         
+            if (epoch % test_freq == 0) | (epoch == epoches - 1):         
                 model.eval()
                 tar_v, pre_v = valid_epoch(model, label_test_loader, criterion, optimizer)
                 OA2, AA_mean2, Kappa2, AA2 = output_metric(tar_v, pre_v)
@@ -427,8 +442,12 @@ def run_model_training(seed, data, label):
     print("**************************************************")
     print("Parameter:")
 
-    def print_args(args):
-        for k, v in zip(args.keys(), args.values()):
-            print("{0}: {1}".format(k,v))
+    def print_run_args(run_args):
+        for k, v in vars(run_args).items():
+            print("{0}: {1}".format(k, v))
 
-    print_args(vars(args))
+    print_run_args(args)
+
+
+if __name__ == '__main__':
+    run(args)

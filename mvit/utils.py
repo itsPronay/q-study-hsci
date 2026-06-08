@@ -7,6 +7,14 @@ from matplotlib import colors
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 
+# apply pca
+def applyPCA(data, numComponents=30):
+    new_data = np.reshape(data, (-1, data.shape[2]))
+    pca = PCA(n_components=numComponents, whiten=True)
+    new_data = pca.fit_transform(new_data)
+    new_data = np.reshape(new_data, (data.shape[0], data.shape[1], numComponents))
+    return new_data, pca
+
 
 def safe_norm(s, axis=-1, epsilon=1e-7, keep_dim=False):
     squared_norm = torch.sum(torch.square(s), axis=axis, keepdim=keep_dim)
@@ -60,6 +68,23 @@ def test(model, test_loader):
             tar = np.append(tar, batch_target.data.cpu().numpy())
             pre = np.append(pre, pp.data.cpu().numpy())
     return tar, pre
+
+def class_accuracy_percent(tar, pre, num_classes):
+    accuracies = {}
+
+    for c in range(num_classes):
+        idx = (tar == c)
+        total = idx.sum()
+
+        if total == 0:
+            acc = 0.0
+        else:
+            correct = (pre[idx] == c).sum()
+            acc = (correct / total) * 100  # convert to percentage
+
+        accuracies[c] = acc
+
+    return accuracies
 
 
 def valid(model, valid_loader, criterion):
