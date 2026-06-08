@@ -38,6 +38,8 @@ from download_dataset import downloadAndLoadDataset
 from .model import MViT
 from .utils import class_accuracy_percent
 from .quantize_mvit import test_batch_quantized
+from spectralSpacialMamba.quantize_mamba import getParamCount
+
 # %matplotlib inline
 
 
@@ -111,6 +113,8 @@ def run_mvit(args):
     )
     scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=gamma)
 
+    getParamCount(model, printLayers=True)
+    
     print('start training')
     acc_list = [0.00]
     os.makedirs('./model', exist_ok=True)
