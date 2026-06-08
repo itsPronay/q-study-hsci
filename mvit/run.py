@@ -24,16 +24,16 @@ from einops import rearrange, repeat
 from timm.models.vision_transformer import Block
 
 
-from data_prepare import mirror_hsi
-from data_prepare import choose_train_and_test
-from data_prepare import choose_all_pixels, all_data
-from data_prepare import train_and_test_data, train_and_test_label
+from .data_prepare import mirror_hsi
+from .data_prepare import choose_train_and_test
+from .data_prepare import choose_all_pixels, all_data
+from .data_prepare import train_and_test_data, train_and_test_label
 
 
-from Utils import output_metric, plot_confusion_matrix
+from .utils import output_metric, plot_confusion_matrix
 from CNNUtils import train, test, valid
-from Utils import list_to_colormap, classification_map, print_args
-from Utils import ActivationOutputData
+from .utils import list_to_colormap, classification_map, print_args
+from .utils import ActivationOutputData
 from download_dataset import downloadAndLoadDataset
 
 

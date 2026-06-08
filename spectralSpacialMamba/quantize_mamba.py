@@ -50,7 +50,9 @@ def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass,
         model=model,
         nbits=args.nbits,
         group_size=args.group_size,
-        # device=device,
+        compute_dtype=torch.float32,  # must match your model's dtype
+        del_orig=args.del_orig,
+        verbose=args.verbose,
         exclude_names=MAMBA_EXCLUDE_LAYERS,
     )
 
