@@ -88,7 +88,7 @@ def main():
     # )
 
     if args.model == 'SpectralFormer':
-        # print('Training SpectralFormer...')
+        print('Training SpectralFormer...')
         # run_spectralformer(args)
     elif args.model == 'SpectralSpacialMamba':
         run_mamba(args)
