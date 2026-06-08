@@ -180,7 +180,7 @@ def run(args):
         wandb.finish()
 
     # Save the model
-    saveModel(model, net_name='SpectralSpacialMamba', dataset=args.dataset, run_num=args.num, path='saved_models')
+    # saveModel(model, net_name='SpectralSpacialMamba', dataset=args.dataset, run_num=num, path='saved_models')
    
     jingdu = np.mean(result, axis = -1)
     print(jingdu)

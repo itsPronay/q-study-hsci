@@ -41,15 +41,7 @@ from download_dataset import downloadAndLoadDataset
 
 
 parser = argparse.ArgumentParser("MViT")
-parser.add_argument('--dataset', choices=['LongKou', 'HanChuan', 'HongHu', 'Pavia'], default='Pavia', help='dataset to use')
-parser.add_argument('--seed', type=int, default=42, help='number of seed')
-parser.add_argument('--batch_size', type=int, default=30, help='number of batch size')
-parser.add_argument('--patch_size', type=int, default=15, help='size of patches')
-parser.add_argument('--epoches', type=int, default=100, help='epoch number')
-parser.add_argument('--learning_rate', type=float, default=1e-3, help='learning rate')
-parser.add_argument('--gamma', type=float, default=0.99, help='gamma')
-parser.add_argument('--weight_decay', type=float, default=0.001, help='weight_decay')
-parser.add_argument('--train_number', type=int, default=25, help='num_train_per_class')
+
 args = parser.parse_args(args=[])
 
 
