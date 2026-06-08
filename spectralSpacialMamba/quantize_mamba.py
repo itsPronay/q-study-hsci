@@ -37,13 +37,21 @@ def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass,
     )
 
 # put all these in args
-    model = hqq_wrapper.replace_all_linear_with_hqq(
-        model = model,
-        quant_config = quant_config,
-        compute_dtype = torch.float32,
-        del_orig = args.del_orig,
-        verbose = args.verbose,
-        exclude_names = MAMBA_EXCLUDE_LAYERS,
+    # model = hqq_wrapper.replace_all_linear_with_hqq_safe(
+    #     model = model,
+    #     quant_config = quant_config,
+    #     compute_dtype = torch.float32,
+    #     del_orig = args.del_orig,
+    #     verbose = args.verbose,
+    #     exclude_names = MAMBA_EXCLUDE_LAYERS,
+    # )
+
+    model = hqq_wrapper.replace_all_linear_with_hqq_safe(
+        model=model,
+        nbits=args.nbits,
+        group_size=args.group_size,
+        # device=device,
+        exclude_names=MAMBA_EXCLUDE_LAYERS,
     )
 
     model.eval()

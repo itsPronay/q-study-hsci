@@ -132,3 +132,70 @@ def replace_all_linear_with_hqq(
     )
 
     return model
+
+def replace_all_linear_with_hqq_safe(
+    model,
+    nbits,
+    group_size,
+    compute_dtype=torch.float16,
+    device="cuda",
+    del_orig=True,
+    verbose=True,
+    exclude_names=None,
+):
+    """
+    Same as replace_all_linear_with_hqq but:
+    1. Excludes layers by substring match (e.g. "dt_proj" matches "blocks.0.spa_block.self_attention.dt_proj")
+    2. Falls back to group_size=None for layers whose weight.numel() is not divisible by group_size
+    """
+    if exclude_names is None:
+        exclude_names = []
+
+    # get ALL linear layer names, no filtering yet
+    all_linear_names = get_all_linear_layer_names(model, exclude_names=None)
+
+    skipped = []
+    replaced = []
+
+    for full_name in all_linear_names:
+
+        # substring match exclude
+        if any(ex in full_name for ex in exclude_names):
+            print(f"[HQQ] Skipping {full_name} (excluded)")
+            skipped.append(full_name)
+            continue
+
+        if "." in full_name:
+            parent_name, child_name = full_name.rsplit(".", 1)
+        else:
+            parent_name, child_name = "", full_name
+
+        parent_module = get_submodule_name(model, parent_name)
+        child_module  = getattr(parent_module, child_name)
+
+        # safe group_size check
+        total_elements = child_module.weight.numel()
+        if group_size is not None and total_elements % group_size != 0:
+            print(f"[HQQ] {full_name}: {child_module.weight.shape} not divisible by group_size={group_size}, falling back to group_size=None")
+            effective_gs = None
+        else:
+            effective_gs = group_size
+
+        quant_config = BaseQuantizeConfig(nbits=nbits, group_size=effective_gs)
+
+        hqq_layer = HQQLinear(
+            child_module,
+            quant_config=quant_config,
+            compute_dtype=compute_dtype,
+            device=device,
+            initialize=True,
+            del_orig=del_orig,
+        )
+        setattr(parent_module, child_name, hqq_layer)
+        replaced.append(full_name)
+
+        if verbose:
+            print(f"[HQQ] Replaced {full_name} | nbits={nbits} | group_size={effective_gs}")
+
+    print(f"\n[HQQ] Done. Replaced: {len(replaced)} | Skipped: {len(skipped)}")
+    return model

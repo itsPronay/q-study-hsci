@@ -85,5 +85,25 @@ x_train, x_test, x_valid = train_and_test_data(mirror_data, band, total_pos_trai
 y_train, y_test, y_valid = train_and_test_label(number_train, number_test, number_valid, num_classes)
 
 
-
 data, label = downloadAndLoadDataset(args.dataset)
+
+# load data
+x_train = torch.from_numpy(x_train.transpose(0, 3, 1, 2)).unsqueeze(1).type(torch.FloatTensor)  # (90, 30, 15, 15)
+print(x_train.shape)
+y_train = torch.from_numpy(y_train).type(torch.LongTensor)  # (13,)
+train_label = Data.TensorDataset(x_train, y_train)
+
+x_test = torch.from_numpy(x_test.transpose(0, 3, 1, 2)).unsqueeze(1).type(torch.FloatTensor)  # (5198, 30, 15, 15)
+print(x_test.shape)
+y_test = torch.from_numpy(y_test).type(torch.LongTensor)  # (5198,)
+test_label = Data.TensorDataset(x_test, y_test)
+
+x_valid = torch.from_numpy(x_valid.transpose(0, 3, 1, 2)).unsqueeze(1).type(torch.FloatTensor)  # (5211, 30, 15, 15)
+print(x_valid.shape)
+y_valid = torch.from_numpy(y_valid).type(torch.LongTensor)
+valid_label = Data.TensorDataset(x_valid, y_valid)
+
+train_loader = Data.DataLoader(train_label, batch_size=30, shuffle=True)
+test_loader = Data.DataLoader(test_label, batch_size=128, shuffle=True)
+valid_loader = Data.DataLoader(valid_label, batch_size=64, shuffle=True)
+
