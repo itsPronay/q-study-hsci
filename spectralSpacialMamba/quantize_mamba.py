@@ -19,8 +19,17 @@ def getParamCount(model, printLayers=False):
     print("\nTotal Trainable Parameters:", total_param)
     return total_param
 
+
 def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass, nvalid_perClass, halfsize,):
     getParamCount(model, printLayers=True)
+
+    MAMBA_EXCLUDE_LAYERS = [
+        "dt_proj",    # directly accesses .weight in forward_core line 248
+        "x_proj",     # same issue
+        "out_proj",   # same issue
+        "linear",     # 299x299 = 89401, not divisible by any group size
+        "head",       # classification head
+    ]
         
     quant_config = BaseQuantizeConfig(
         nbits=args.nbits,
@@ -34,7 +43,7 @@ def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass,
         compute_dtype = torch.float32,
         del_orig = args.del_orig,
         verbose = args.verbose,
-        exclude_names = args.exclude_names,
+        exclude_names = MAMBA_EXCLUDE_LAYERS,
     )
 
     model.eval()
