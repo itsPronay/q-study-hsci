@@ -9,18 +9,13 @@ from utils.get_model_summary import getParamCount, printWeightStatistics, print_
 def test_batch_quantized(args, model):
     exclude_layers = [
         "mlp_head",
-        # "patch_to_embedding" # fails for group_size = 64
+        "patch_to_embedding" # fails for group_size = 64
     ]
 
-    # getParamCount(model, printLayers=True)        
-    quant_config = BaseQuantizeConfig(
+    model = hqq_wrapper.replace_all_linear_with_hqq_safe(
+        model=model,
         nbits=args.nbits,
         group_size=args.group_size,
-    )
-
-    model = hqq_wrapper.replace_all_linear_with_hqq(
-        model=model,
-        quant_config=quant_config,
         compute_dtype=torch.float32, 
         del_orig=args.del_orig,
         verbose=args.verbose,
