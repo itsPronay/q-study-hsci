@@ -72,7 +72,7 @@ def run_mvit(args):
     if args.dataset == 'Indian':
         train_num = 10
     else:
-        train_num= 20
+        train_num= args.train_num
     total_pos_train, total_pos_test, total_pos_valid, number_train, number_test, number_valid = choose_train_and_test(
         label, num_train_per_class=train_num, seed=args.seed
     )
