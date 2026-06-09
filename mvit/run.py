@@ -8,11 +8,9 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as PathEffects
 
-
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-
 
 import torch
 import torch.nn as nn
@@ -48,21 +46,6 @@ from spectralSpacialMamba.quantize_mamba import getParamCount
 
 def run_mvit(args):
 
-    # #
-    #
-    #
-    #
-    # check with the mvit codebasse and correct them here
-    # few datasets are missing in the download dataset.py folder, download dataset from there
-    seed = getattr(args, 'seed', 0)
-    train_num = getattr(args, 'train_num', 20)
-    patch_size = getattr(args, 'patch_size_mvit', 15)
-    batch_size = getattr(args, 'batch_size_mvit', 30)
-    gamma = getattr(args, 'gamma_mvit', 0.99)
-    epoches = getattr(args, 'epoches', getattr(args, 'epoch', 100))
-    learning_rate = getattr(args, 'learning_rate_mvit', getattr(args, 'learning_rate', 1e-3))
-    weight_decay = getattr(args, 'weight_decay_mvit', 0.0)
-
     # Load data
     data, label = downloadAndLoadDataset(args.dataset)
     num_classes = int(np.max(label))
@@ -84,14 +67,14 @@ def run_mvit(args):
     height, width, band = data.shape
     print("height={0}, width={1}, band={2}".format(height, width, band))
 
-    mirror_data = mirror_hsi(height, width, band, data, patch_size=patch_size)
+    mirror_data = mirror_hsi(height, width, band, data, patch_size=args.patch_size_mvit)
 
     total_pos_train, total_pos_test, total_pos_valid, number_train, number_test, number_valid = choose_train_and_test(
-        label, num_train_per_class=train_num, seed=seed
+        label, num_train_per_class=args.train_number, seed=args.seed
     )
 
     x_train, x_test, x_valid = train_and_test_data(
-        mirror_data, band, total_pos_train, total_pos_test, total_pos_valid, patch_size
+        mirror_data, band, total_pos_train, total_pos_test, total_pos_valid, patch_size=args.patch_size_mvit
     )
     y_train, y_test, y_valid = train_and_test_label(number_train, number_test, number_valid, num_classes)
 
@@ -111,17 +94,17 @@ def run_mvit(args):
     y_valid = torch.from_numpy(y_valid).type(torch.LongTensor)
     valid_label = Data.TensorDataset(x_valid, y_valid)
 
-    train_loader = Data.DataLoader(train_label, batch_size=batch_size, shuffle=True)
-    test_loader = Data.DataLoader(test_label, batch_size=batch_size, shuffle=True)
-    valid_loader = Data.DataLoader(valid_label, batch_size=batch_size, shuffle=True)
+    train_loader = Data.DataLoader(train_label, batch_size=args.batch_size, shuffle=True)
+    test_loader = Data.DataLoader(test_label, batch_size=args.batch_size, shuffle=True)
+    valid_loader = Data.DataLoader(valid_label, batch_size=args.batch_size, shuffle=True)
 
     model = MViT(num_classes=num_classes).cuda()
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(
-        model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=weight_decay
+        model.parameters(), lr=args.learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=args.weight_decay_mvit
     )
-    scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=gamma)
+    scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=args.gamma_mvit)
 
     getParamCount(model, printLayers=True)
     
@@ -130,7 +113,7 @@ def run_mvit(args):
     os.makedirs('./model', exist_ok=True)
     path = './model/mvit.pt'
     tic = time.time()
-    for epoch in range(epoches):
+    for epoch in range(args.epoch):
         # 计算的是移动平均准确率
         train_acc, train_loss = train(model, train_loader, criterion, optimizer)
         valid_acc, valid_loss = valid(model, valid_loader, criterion)
@@ -158,20 +141,14 @@ def run_mvit(args):
     test_tar, test_pre = test(model, test_loader)
     OA, AA_mean, kappa, AA = output_metric(test_tar, test_pre)
 
-    #print details
-    per_class_acc = class_accuracy_percent(test_tar, test_pre, num_classes)
-
     # quantize model and test 
     quantized_model = test_batch_quantized(args, model)
+
+    #test quantized model
     test_tar_quantized, test_pre_quantized = test(quantized_model, test_loader)
     OA_quantized, AA_mean_quantized, kappa_quantized, AA_quantized = output_metric(test_tar_quantized, test_pre_quantized)
 
-    # #Print details
-    # print("Quantized model - OA: {:.4f}, AA: {:.4f}, Kappa: {:.4f}".format(OA_quantized, AA_mean_quantized, kappa_quantized))
-    # per_class_acc_quantized = class_accuracy_percent(test_tar_quantized, test_pre_quantized, num_classes)
-    # for c in range(num_classes):
-    #     print("Quantized model - Class {}: {:.4f}%".format(c + 1, per_class_acc_quantized[c]))
-
+    # get per class accuracy for both original and quantized model
     class_acc = class_accuracy_percent(test_tar, test_pre, num_classes)
     clas_acc_quantized = class_accuracy_percent(test_tar_quantized, test_pre_quantized, num_classes)
 
