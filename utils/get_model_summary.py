@@ -43,4 +43,4 @@ def print_quantization_summary(model):
     
     print(f"\nQuantized: {quantized_layers} layers")
 
-print_quantization_summary(model)
+    print_quantization_summary(model)
