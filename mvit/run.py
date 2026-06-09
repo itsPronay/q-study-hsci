@@ -20,8 +20,8 @@ from torch import optim
 import torch.utils.data as Data
 import torch.nn.functional as F
 import wandb
-from spectralSpacialMamba.run import getClassOutput
-from spectralSpacialMamba.run import getClassOutput
+from spectralSpacialMamba.run import getClassOutputForEachClass
+from spectralSpacialMamba.run import getClassOutputForEachClass
 from torchsummary import summary
 from einops import rearrange, repeat
 from timm.models.vision_transformer import Block
@@ -47,12 +47,19 @@ from spectralSpacialMamba.quantize_mamba import getParamCount
 
 
 def run_mvit(args):
+
+    # #
+    #
+    #
+    #
+    # check with the mvit codebasse and correct them here
+    # few datasets are missing in the download dataset.py folder, download dataset from there
     seed = getattr(args, 'seed', 0)
     train_num = getattr(args, 'train_num', 20)
     patch_size = getattr(args, 'patch_size_mvit', 15)
     batch_size = getattr(args, 'batch_size_mvit', 30)
     gamma = getattr(args, 'gamma_mvit', 0.99)
-    epoches = getattr(args, 'epoches', getattr(args, 'num_epochs', 100))
+    epoches = getattr(args, 'epoches', getattr(args, 'epoch', 100))
     learning_rate = getattr(args, 'learning_rate_mvit', getattr(args, 'learning_rate', 1e-3))
     weight_decay = getattr(args, 'weight_decay_mvit', 0.0)
 
@@ -164,7 +171,10 @@ def run_mvit(args):
     # per_class_acc_quantized = class_accuracy_percent(test_tar_quantized, test_pre_quantized, num_classes)
     # for c in range(num_classes):
     #     print("Quantized model - Class {}: {:.4f}%".format(c + 1, per_class_acc_quantized[c]))
-    
+
+    class_acc = class_accuracy_percent(test_tar, test_pre, num_classes)
+    clas_acc_quantized = class_accuracy_percent(test_tar_quantized, test_pre_quantized, num_classes)
+
     results = {
         'model' : 'MViT',
         'dataset': args.dataset,
@@ -174,8 +184,8 @@ def run_mvit(args):
         'OA_quantized': OA_quantized,
         'AA_quantized': AA_mean_quantized,
         'Kappa_quantized': kappa_quantized,
-        **class_accuracy_percent(test_tar, test_pre, is_quantized=False),
-        **class_accuracy_percent(test_tar_quantized, test_pre_quantized, is_quantized=True),
+        **getClassOutputForEachClass(class_acc),
+        **getClassOutputForEachClass(clas_acc_quantized, is_quantized=True),
     }
 
     for key, value in results.items():

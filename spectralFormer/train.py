@@ -21,6 +21,7 @@ import numpy as np
 import time
 import os
 from mvit.utils import output_metric
+from spectralSpacialMamba.run import getClassOutputForEachClass
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
 #-------------------------------------------------------------------------------
@@ -365,13 +366,9 @@ def train_spectralformer(args):
         'OA_quantized': OA_quantized,
         'AA_quantized': AA_mean_quantized,
         'Kappa_quantized': kappa_quantized,
+        **getClassOutputForEachClass(per_class_acc),
+        **getClassOutputForEachClass(per_class_acc_quantized, is_quantized=True),
     }
-
-     ### extract per class accuracy 
-    print("OA: {:.4f}, AA: {:.4f}, Kappa: {:.4f}".format(OA, AA_mean, kappa))
-    for c in range(num_classes):
-        results[f'class_{c+1}_acc'] = per_class_acc[c]
-        results[f'class_{c+1}_acc_quantized'] = per_class_acc_quantized[c]
 
     for key, value in results.items():
         print(f"{key}: {value}")

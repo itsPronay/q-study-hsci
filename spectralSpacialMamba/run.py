@@ -17,13 +17,13 @@ from spectralSpacialMamba.utils import saveModel
 from .model import mamba_1D_model, mamba_2D_model, mamba_SS_model
 from .quantize_mamba import test_batch_quantized
 
-def getClassOutput(true_cla, is_quantized=False):
+def getClassOutputForEachClass(accuracies, is_quantized=False):
     if is_quantized:
         prefix = "q_each_acc"
     else:
         prefix = "each_acc"
-    print(true_cla)
-    return {f"{prefix}/class_{i+1}": true_cla[i] for i in range(len(true_cla))}
+    print(accuracies)
+    return {f"{prefix}/class_{i+1}": accuracies[i] for i in range(len(accuracies))}
 
 def run(args):
     day = datetime.datetime.now()
@@ -133,8 +133,8 @@ def run(args):
         'AA_quantized' : str(average_accuracy_quantized),
         'OA_quantized' : str(overall_accuracy_quantized),
         'Kappa_quantized' : str(kappa_quantized),
-        **getClassOutput(true_cla),
-        **getClassOutput(true_cla_quantized, is_quantized=True),
+        **getClassOutputForEachClass(true_cla),
+        **getClassOutputForEachClass(true_cla_quantized, is_quantized=True),
     }
 
     for key, value in output.items(): 
