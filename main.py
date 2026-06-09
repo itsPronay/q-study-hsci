@@ -20,9 +20,9 @@ parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'Pavia', '
 # parser.add_argument('--group_size', type=int, default=145)
 # parser.add_argument('--batch_size', type=int, default=64)
 parser.add_argument('--num_epochs', type=int, default=100)
-parser.add_argument('--learning_rate', type=float, default=1e-3)
-parser.add_argument('--patches', type=int, default=5)
-parser.add_argument('--band_patch', type=int, default=9)
+# parser.add_argument('--learning_rate', type=float, default=1e-3)
+# parser.add_argument('--patches', type=int, default=5)
+# parser.add_argument('--band_patch', type=int, default=9)
 parser.add_argument('--train_num', type=int, default=20)
 parser.add_argument('--batch_size', type=int, default=512)
 # wandb args
