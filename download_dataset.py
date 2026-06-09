@@ -50,7 +50,7 @@ DATASETS = {
             ( "indian_pines_gt.mat", "http://www.ehu.eus/ccwintco/uploads/c/c4/Indian_pines_gt.mat"),
         ],
     },
-    # For houston use Houston
+    'Houston': { }
 }
 
 #
