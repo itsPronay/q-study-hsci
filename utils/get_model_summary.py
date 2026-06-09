@@ -14,3 +14,9 @@ def getParamCount(model, printLayers=False):
     
     print("\nTotal Trainable Parameters:", total_param)
     return total_param
+
+def printWeightStatistics(model):
+    print("\n[INFO] __________________________________________Model Weight Statistics:__________________________________________")
+    for name, param in model.named_parameters():
+        if param.requires_grad:
+            print(f"{name}: mean={param.data.mean():.4f}, std={param.data.std():.4f}, min={param.data.min():.4f}, max={param.data.max():.4f}")
