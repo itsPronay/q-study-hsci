@@ -174,8 +174,8 @@ def run_mvit(args):
         'OA_quantized': OA_quantized,
         'AA_quantized': AA_mean_quantized,
         'Kappa_quantized': kappa_quantized,
-        **getClassOutput(test_tar, is_quantized=False),
-        **getClassOutput(test_tar_quantized, is_quantized=True),
+        **class_accuracy_percent(test_tar, test_pre, is_quantized=False),
+        **class_accuracy_percent(test_tar_quantized, test_pre_quantized, is_quantized=True),
     }
 
     for key, value in results.items():

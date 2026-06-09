@@ -22,6 +22,7 @@ def getClassOutput(true_cla, is_quantized=False):
         prefix = "q_each_acc"
     else:
         prefix = "each_acc"
+    print(true_cla)
     return {f"{prefix}/class_{i+1}": true_cla[i] for i in range(len(true_cla))}
 
 def run(args):
