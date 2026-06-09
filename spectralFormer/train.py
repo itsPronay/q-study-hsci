@@ -273,7 +273,7 @@ def train_spectralformer(args):
     # create model
     model = ViT(
         image_size = args.patches_sf,
-        near_band = args.band_patches_sf,
+        near_band = args.band_patches,
         num_patches = band,
         num_classes = num_classes,
         dim = 64,
