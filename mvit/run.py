@@ -69,8 +69,12 @@ def run_mvit(args):
 
     mirror_data = mirror_hsi(height, width, band, data, patch_size=args.patch_size_mvit)
 
+    if args.dataset == 'Indian':
+        train_num = 10
+    else:
+        train_num= 20
     total_pos_train, total_pos_test, total_pos_valid, number_train, number_test, number_valid = choose_train_and_test(
-        label, num_train_per_class=args.train_num, seed=args.seed
+        label, num_train_per_class=train_num, seed=args.seed
     )
 
     x_train, x_test, x_valid = train_and_test_data(

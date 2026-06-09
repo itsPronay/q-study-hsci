@@ -45,9 +45,13 @@ def choose_train_and_test(groundtruth, num_train_per_class=10, seed=42):  # divi
         pos_test[i] = each_class[num_train_per_class:]
         number_test.append(pos_test[i].shape[0])  # The number of testing samples for each class.
         
-        pos_valid[i] = each_class[-100:]
-        number_valid.append(100)
-    
+        if num_train_per_class == 10: 
+            pos_valid[i] = each_class[-5:]       # it it to prevent the shape mismatch problem when indian pines has 20 class,
+            number_valid.append(pos_valid[i].shape[0])
+        else:
+            pos_valid[i] = each_class[-100:]
+            number_valid.append(100)
+
     total_pos_train = pos_train[0]
     for i in range(1, num_classes):
         total_pos_train = np.r_[total_pos_train, pos_train[i]]
