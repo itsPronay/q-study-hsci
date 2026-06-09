@@ -9,7 +9,7 @@ from utils.get_model_summary import getParamCount, printWeightStatistics, print_
 def test_batch_quantized(args, model):
     exclude_layers = [
         "mlp_head",
-        "patch_to_embedding" # fails for group_size = 64
+        # "patch_to_embedding" # fails for group_size = 64
     ]
 
     # getParamCount(model, printLayers=True)        
