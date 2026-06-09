@@ -34,7 +34,7 @@ DATASETS = {
         "labelkey": "pavia_gt",
         "url": "https://www.kaggle.com/api/v1/datasets/download/syamkakarla/pavia-university-hsi",
         "type": "zip",
-        "unzipped_file_names": ["Pavia.mat", "Pavia_gt.mat"] #after unzipping, the files we expect to find in the extracted folder
+        "unzipped_file_names": ["PaviaU.mat", "PaviaU_gt.mat"] #after unzipping, the files we expect to find in the extracted folder
     },
     'Indian':{
         "datakey": "indian_pines", #key of data in .mat file
@@ -42,6 +42,13 @@ DATASETS = {
         "url" : "https://www.kaggle.com/api/v1/datasets/download/emannasserabdelhafez/indian-pines",
         "type": "zip",
         "unzipped_file_names": ["indian_pines_corrected.mat", "indian_pines_gt.mat"] #after unzipping, the files we expect to find in the extracted folder
+    },
+    'Houston':{
+        "datakey": 'data',
+        "labelkey": 'mask_train',
+        "url" : "https://www.kaggle.com/api/v1/datasets/download/mingliu123/houston",
+        "type" : "zip",
+        "unzipped_file_names": ["data.mat", "mask_train.mat"]
     }
 }
 
