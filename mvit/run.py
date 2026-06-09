@@ -102,7 +102,7 @@ def run_mvit(args):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(
-        model.parameters(), lr=args.learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=args.weight_decay_mvit
+        model.parameters(), lr=args.learning_rate_mvit, betas=(0.9, 0.999), eps=1e-8, weight_decay=args.weight_decay_mvit
     )
     scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=args.gamma_mvit)
 
