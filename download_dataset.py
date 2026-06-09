@@ -30,8 +30,8 @@ DATASETS = {
         ],
     },
     "Pavia": {
-        "datakey": "pavia",
-        "labelkey": "pavia_gt",
+        "datakey": "paviaU",
+        "labelkey": "paviaU_gt",
         "url": "https://www.kaggle.com/api/v1/datasets/download/syamkakarla/pavia-university-hsi",
         "type": "zip",
         "unzipped_file_names": ["PaviaU.mat", "PaviaU_gt.mat"] #after unzipping, the files we expect to find in the extracted folder
