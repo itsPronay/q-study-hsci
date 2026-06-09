@@ -251,7 +251,7 @@ def train_spectralformer(args):
     total_pos_train, total_pos_test, total_pos_true, number_train, number_test, number_true = chooose_train_and_test_point(label, args.train_num, args.seed)
 
     mirror_image = mirror_hsi(height, width, band, input_normalize, patch=args.patches_sf)
-    x_train_band, x_test_band, x_true_band = train_and_test_data(mirror_image, band, total_pos_train, total_pos_test, total_pos_true, patch=args.patches, band_patch=args.band_patches)
+    x_train_band, x_test_band, x_true_band = train_and_test_data(mirror_image, band, total_pos_train, total_pos_test, total_pos_true, patch=args.patches_sf, band_patch=args.band_patches)
     y_train, y_test, y_true = train_and_test_label(number_train, number_test, number_true, num_classes)
     #-------------------------------------------------------------------------------
     # load data
@@ -288,8 +288,8 @@ def train_spectralformer(args):
     # criterion
     criterion = nn.CrossEntropyLoss().cuda()
     # optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.epoches//10, gamma=args.gamma)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate_sf, weight_decay=args.weight_decay_sf)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.epoches//10, gamma=args.gamma_sf)
     #-------------------------------------------------------------------------------
     # if args.flag_test == 'test':
     #     if args.mode == 'ViT':
