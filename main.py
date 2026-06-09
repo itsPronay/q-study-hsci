@@ -13,6 +13,8 @@ from spectralFormer.train import train_spectralformer
 
 parser = argparse.ArgumentParser(description='Study quantization of different models on hyperspectral image classification')
 
+parser.add_argument('--wandb_project', type=str, default='Quantization Study', help='wandb project name')
+
 parser.add_argument('--model', type=str,choices=['SpectralFormer', 'SpectralSpacialMamba', 'mvit'], default='SpectralSpacialMamba')
 parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'Pavia', 'Indian'], default='UP')
 # parser.add_argument('--group_size', type=int, default=145)
