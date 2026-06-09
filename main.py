@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description='Study quantization of different mo
 parser.add_argument('--wandb_project', type=str, default='Quantization Study', help='wandb project name')
 
 parser.add_argument('--model', type=str,choices=['SpectralFormer', 'SpectralSpacialMamba', 'mvit'], default='SpectralSpacialMamba')
-parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'Pavia', 'Indian'], default='UP')
+parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'Pavia', 'Indian', 'Houston'], default='UP')
 # parser.add_argument('--group_size', type=int, default=145)
 # parser.add_argument('--batch_size', type=int, default=64)
 parser.add_argument('--num_epochs', type=int, default=100)
