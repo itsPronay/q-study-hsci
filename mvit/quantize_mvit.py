@@ -28,7 +28,7 @@ def test_batch_quantized(args, model):
 
     # check if model has been quantized
     if args.print_quantization_summary:
-        print("\n[INFO] Model after quantization:")
+        print("\n[INFO]__________________________________ Model after quantization: __________________________________")
         getParamCount(model, printLayers=args.print_layers)
         print_quantization_summary(model)
 

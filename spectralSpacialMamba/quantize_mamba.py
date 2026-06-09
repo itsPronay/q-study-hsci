@@ -3,7 +3,7 @@ from hqq.core.quantize import BaseQuantizeConfig
 import hqq_wrapper
 from spectralSpacialMamba.utils import test_batch
 import numpy as np
-from utils.get_model_summary import getParamCount, printWeightStatistics
+from utils.get_model_summary import getParamCount, print_quantization_summary, printWeightStatistics
 
 
 def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass, nvalid_perClass, halfsize,):
@@ -29,9 +29,9 @@ def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass,
 
       # check if model has been quantized
     if args.print_quantization_summary:
-        print("\n[INFO] Model after quantization:")
-        getParamCount(model, printLayers=True)
-        printWeightStatistics(model)
+        print("\n[INFO]__________________________________ Model after quantization: __________________________________")
+        getParamCount(model, printLayers=args.print_layers)
+        print_quantization_summary(model)
 
     # test quantized model
     model.eval()
