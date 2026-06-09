@@ -18,13 +18,11 @@ from .model import mamba_1D_model, mamba_2D_model, mamba_SS_model
 from .quantize_mamba import test_batch_quantized
 
 def getClassOutput(true_cla, is_quantized=False):
-    class_names = [f"class_{i}" for i in range(len(true_cla))]
     if is_quantized:
-        per_class_dict = {f"each_acc/class_no{class_names[i]}": true_cla[i] for i in range(len(true_cla))}
+        prefix = "q_each_acc"
     else:
-        per_class_dict = {f"q_each_acc/class_no{class_names[i]}": true_cla[i] for i in range(len(true_cla))}
-    print(len(per_class_dict))
-    return per_class_dict
+        prefix = "each_acc"
+    return {f"{prefix}/class_{i+1}": true_cla[i] for i in range(len(true_cla))}
 
 def run(args):
     day = datetime.datetime.now()
@@ -138,8 +136,8 @@ def run(args):
         **getClassOutput(true_cla_quantized, is_quantized=True),
     }
 
-    # for key, value in output.items(): 
-    #     print(f"{key}: {value}")
+    for key, value in output.items(): 
+        print(f"{key}: {value}")
 
     if args.wandb_mode != 'disabled':
         wandb.log(output)

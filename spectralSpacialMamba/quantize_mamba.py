@@ -27,10 +27,11 @@ def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass,
         exclude_names=MAMBA_EXCLUDE_LAYERS,
     )
 
-    #check if model has been quantized
-    print("\n[INFO] Model after quantization:")
-    getParamCount(model, printLayers=True)
-    printWeightStatistics(model)
+      # check if model has been quantized
+    if args.print_quantization_summary:
+        print("\n[INFO] Model after quantization:")
+        getParamCount(model, printLayers=True)
+        printWeightStatistics(model)
 
     # test quantized model
     model.eval()
