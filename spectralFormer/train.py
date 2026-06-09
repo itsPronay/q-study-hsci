@@ -289,7 +289,7 @@ def train_spectralformer(args):
     criterion = nn.CrossEntropyLoss().cuda()
     # optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate_sf, weight_decay=args.weight_decay_sf)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.epoches//10, gamma=args.gamma_sf)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.epoch//10, gamma=args.gamma_sf)
     #-------------------------------------------------------------------------------
     # if args.flag_test == 'test':
     #     if args.mode == 'ViT':
@@ -320,7 +320,7 @@ def train_spectralformer(args):
     os.makedirs('./model', exist_ok=True)
     path = './model/mvit.pt'
     tic = time.time()
-    for epoch in range(args.epoches):
+    for epoch in range(args.epoch):
         # 计算的是移动平均准确率
         train_acc, train_loss = train(model, label_train_loader, criterion, optimizer)
         valid_acc, valid_loss = valid(model, label_true_loader, criterion)
