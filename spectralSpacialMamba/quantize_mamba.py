@@ -17,15 +17,29 @@ def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass,
         "head",       # classification head
     ]
 
-    model = hqq_wrapper.replace_all_linear_with_hqq_safe(
+    quant_config=BaseQuantizeConfig(
+            nbits=args.nbits,
+            group_size=args.group_size,
+        )
+    
+    model = hqq_wrapper.replace_all_linear_with_hqq(
         model=model,
-        nbits=args.nbits,
-        group_size=args.group_size,
-        compute_dtype=torch.float32,  # must match your model's dtype
+        quant_config=quant_config,
+        compute_dtype=torch.float32, 
         del_orig=args.del_orig,
         verbose=args.verbose,
         exclude_names=MAMBA_EXCLUDE_LAYERS,
     )
+
+    # model = hqq_wrapper.replace_all_linear_with_hqq_safe(
+    #     model=model,
+    #     nbits=args.nbits,
+    #     group_size=args.group_size,
+    #     compute_dtype=torch.float32,  # must match your model's dtype
+    #     del_orig=args.del_orig,
+    #     verbose=args.verbose,
+    #     exclude_names=MAMBA_EXCLUDE_LAYERS,
+    # )
 
       # check if model has been quantized
     if args.print_quantization_summary:
