@@ -3,21 +3,7 @@ from hqq.core.quantize import BaseQuantizeConfig
 import hqq_wrapper
 from spectralSpacialMamba.utils import test_batch
 import numpy as np
-
-
-def getParamCount(model, printLayers=False):
-    total_param = 0
-    for name, param in model.named_parameters():
-        if param.requires_grad:
-            num_param = np.prod(param.size())
-            if param.dim() > 1 and printLayers:
-                print(name+':', 'x'.join(str(x) for x in list(param.size())), '=', num_param)
-            elif printLayers:
-                print(name+':', num_param)
-            total_param += num_param
-    
-    print("\nTotal Trainable Parameters:", total_param)
-    return total_param
+from utils.get_model_summary import getParamCount
 
 
 def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass, nvalid_perClass, halfsize,):
@@ -30,21 +16,6 @@ def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass,
         "linear",     # 299x299 = 89401, not divisible by any group size
         "head",       # classification head
     ]
-        
-    quant_config = BaseQuantizeConfig(
-        nbits=args.nbits,
-        group_size=args.group_size,
-    )
-
-# put all these in args
-    # model = hqq_wrapper.replace_all_linear_with_hqq_safe(
-    #     model = model,
-    #     quant_config = quant_config,
-    #     compute_dtype = torch.float32,
-    #     del_orig = args.del_orig,
-    #     verbose = args.verbose,
-    #     exclude_names = MAMBA_EXCLUDE_LAYERS,
-    # )
 
     model = hqq_wrapper.replace_all_linear_with_hqq_safe(
         model=model,
@@ -56,6 +27,11 @@ def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass,
         exclude_names=MAMBA_EXCLUDE_LAYERS,
     )
 
+    #check if model has been quantized
+    print("\n[INFO] Model after quantization:")
+    getParamCount(model, printLayers=True)
+
+    # test quantized model
     model.eval()
 
     true_cla_q, oa_q, aa_q, kappa_q, cm_q, pred_q = test_batch(
@@ -68,7 +44,6 @@ def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass,
 
     return true_cla_q, oa_q, aa_q, kappa_q, cm_q, pred_q
     
-
 
 
 

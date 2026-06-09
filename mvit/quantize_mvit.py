@@ -3,6 +3,8 @@ from hqq.core.quantize import BaseQuantizeConfig
 import hqq_wrapper
 from spectralSpacialMamba.utils import test_batch
 import numpy as np
+from utils.get_model_summary import getParamCount
+
 
 def test_batch_quantized(args, model):
     exclude_layers = [
@@ -23,5 +25,9 @@ def test_batch_quantized(args, model):
         verbose=args.verbose,
         exclude_names=exclude_layers,
     )
+
+    #check if model has been quantized
+    print("\n[INFO] Model after quantization:")
+    getParamCount(model, printLayers=True)
 
     return model
