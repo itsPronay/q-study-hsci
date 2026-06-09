@@ -23,6 +23,7 @@ def getClassOutput(true_cla, is_quantized=False):
         per_class_dict = {f"each_acc/class_no{class_names[i]}": true_cla[i] for i in range(len(true_cla))}
     else:
         per_class_dict = {f"q_each_acc/class_no{class_names[i]}": true_cla[i] for i in range(len(true_cla))}
+    print(len(per_class_dict))
     return per_class_dict
 
 def run(args):
@@ -137,8 +138,8 @@ def run(args):
         **getClassOutput(true_cla_quantized, is_quantized=True),
     }
 
-    for key, value in output.items():
-        print(f"{key}: {value}")
+    # for key, value in output.items(): 
+    #     print(f"{key}: {value}")
 
     if args.wandb_mode != 'disabled':
         wandb.log(output)
