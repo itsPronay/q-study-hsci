@@ -69,7 +69,7 @@ parser.add_argument('--use_fu', default=True, type=lambda x: (str(x).lower() == 
 
 #MViT specific args
 # parser.add_argument('--dataset', choices=['LongKou', 'HanChuan', 'HongHu', 'Pavia'], default='Pavia', help='dataset to use')
-# parser.add_argument('--seed', type=int, default=42, help='number of seed')
+parser.add_argument('--seed', type=int, default=42, help='number of seed')
 # parser.add_argument('--batch_size', type=int, default=30, help='number of batch size')
 parser.add_argument('--patch_size_mvit', type=int, default=15, help='size of patches')
 # parser.add_argument('--epoches', type=int, default=100, help='epoch number')
