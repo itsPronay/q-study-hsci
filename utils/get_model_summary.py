@@ -41,6 +41,6 @@ def print_quantization_summary(model):
             print(f"{name}: NOT quantized (fp32) | shape={module.weight.shape}")
         total_layers += 1
     
-    print(f"\nQuantized: {quantized_layers} layers")
+    print(f"\nQuantized: {quantized_layers} layers, Total: {total_layers} layers, Quantization Ratio: {quantized_layers/total_layers:.2%}")
 
     # print_quantization_summary(model)
