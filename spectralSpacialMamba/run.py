@@ -140,8 +140,6 @@ def run(args):
         TESTING_TIME.append(toc2 - toc1)
         ELEMENT_ACC = np.array(AC)
         
-    # wriut code to get standard deviation here if needed
-
     
     if not os.path.exists('record'):
         os.makedirs('record')
@@ -149,28 +147,17 @@ def run(args):
         
     record_output(OA, AA, KA, ELEMENT_ACC, CM, TRAINING_TIME, TESTING_TIME, './record/' + net_name +'_'+ day_str + '_' +args.dataset+'_'+str(train_image.shape[0])+ '_epoch_' + str(args.epoch)+ '_spa_patch_size_' +str(spa_patch_size) +'_spe_patch_size_'+str(spe_patch_size) + '_embed_dim_'+str(embed_dim)+'_depth _'+str(depth)+ '_use_global_'+str(use_global) +'_use_bi _'+str(use_bi)+'_hdi_chans_'+str(hid_chans)+'_lr _'+str(lr)+'_lrdecay_'+str(gamma)+ '_fusion_'+str(args.use_fu) + '_end.txt') 
     
-
-    # #
-    # make sure if we should log element accuracy or not
-    #
     output = {
         'model' : 'SpectralSpacialMamba',
         'dataset' : args.dataset,
-        'epochs' : str(args.epoch),
-        'overall_accuracy' : str(overall_accuracy),
-        'average_accuracy' : str(average_accuracy),
-        'kappa' : str(kappa),
-        # 'element_acc' : ELEMENT_ACC, 
-        'average_accuracy_quantized' : str(average_accuracy_quantized),
-        'overall_accuracy_quantized' : str(overall_accuracy_quantized),
-        'kappa_quantized' : str(kappa_quantized),
+        'OA' : str(overall_accuracy),
+        'AA' : str(average_accuracy),
+        'Kappa' : str(kappa),
+        'AA_quantized' : str(average_accuracy_quantized),
+        'OA_quantized' : str(overall_accuracy_quantized),
+        'Kappa_quantized' : str(kappa_quantized),
         **getClassOutput(true_cla),
         **getClassOutput(true_cla_quantized, is_quantized=True),
-        
-        # 'element_acc_quantized' : true_cla_quantized,
-        # 'training_time' : TRAINING_TIME,
-        # 'testing_time' : TESTING_TIME,
-
     }
 
     for key, value in output.items():
@@ -180,8 +167,5 @@ def run(args):
         wandb.log(output)
         wandb.finish()
 
-    # Save the model
-    # saveModel(model, net_name='SpectralSpacialMamba', dataset=args.dataset, run_num=num, path='saved_models')
-   
     jingdu = np.mean(result, axis = -1)
     print(jingdu)

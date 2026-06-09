@@ -7,6 +7,7 @@ from scipy.io import loadmat
 from scipy.io import savemat
 from torch import optim
 from torch.autograd import Variable
+import wandb
 from .vit_pytorch import ViT
 from sklearn.metrics import confusion_matrix
 from download_dataset import downloadAndLoadDataset
@@ -343,21 +344,40 @@ def train_spectralformer(args):
     model.load_state_dict(torch.load(path))
     model.eval()
 
+    # test model after training
     test_tar, test_pre = test(model, label_test_loader)
     OA, AA_mean, kappa, AA = output_metric(test_tar, test_pre)
     per_class_acc = class_accuracy_percent(test_tar, test_pre, num_classes)
 
+    # quantize model and test
     quantized_model = test_batch_quantized(args, model)
     test_tar_quantized, test_pre_quantized = test(quantized_model, label_test_loader)
     OA_quantized, AA_mean_quantized, kappa_quantized, AA_quantized = output_metric(test_tar_quantized, test_pre_quantized)
     per_class_acc_quantized = class_accuracy_percent(test_tar_quantized, test_pre_quantized, num_classes)   
     
 
-    ### print details
+    results = {
+        'model' : 'SpectralFormer',
+        'dataset': args.dataset,
+        'OA': OA,
+        'AA': AA_mean,
+        'Kappa': kappa,
+        'OA_quantized': OA_quantized,
+        'AA_quantized': AA_mean_quantized,
+        'Kappa_quantized': kappa_quantized,
+    }
+
+     ### extract per class accuracy 
     print("OA: {:.4f}, AA: {:.4f}, Kappa: {:.4f}".format(OA, AA_mean, kappa))
     for c in range(num_classes):
-        print("Class {}: {:.4f}%".format(c + 1, per_class_acc[c]))
-    print("Quantized model - OA: {:.4f}, AA: {:.4f}, Kappa: {:.4f}".format(OA_quantized, AA_mean_quantized, kappa_quantized))
-    for c in range(num_classes):
-        print("Quantized model - Class {}: {:.4f}%".format(c + 1, per_class_acc_quantized[c]))
+        results[f'class_{c+1}_acc'] = per_class_acc[c]
+        results[f'class_{c+1}_acc_quantized'] = per_class_acc_quantized[c]
+
+    for key, value in results.items():
+        print(f"{key}: {value}")
+        
+    if args.wandb_mode != 'disabled':
+        wandb.log(results)
+        wandb.finish()
+
 

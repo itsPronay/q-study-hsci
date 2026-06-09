@@ -19,6 +19,9 @@ import torch.nn as nn
 from torch import optim
 import torch.utils.data as Data
 import torch.nn.functional as F
+import wandb
+from spectralSpacialMamba.run import getClassOutput
+from spectralSpacialMamba.run import getClassOutput
 from torchsummary import summary
 from einops import rearrange, repeat
 from timm.models.vision_transformer import Block
@@ -149,30 +152,35 @@ def run_mvit(args):
     OA, AA_mean, kappa, AA = output_metric(test_tar, test_pre)
 
     #print details
-    print("OA: {:.4f}, AA: {:.4f}, Kappa: {:.4f}".format(OA, AA_mean, kappa))
     per_class_acc = class_accuracy_percent(test_tar, test_pre, num_classes)
-    for c in range(num_classes):
-        print("Class {}: {:.4f}%".format(c + 1, per_class_acc[c]))
 
     # quantize model and test 
     quantized_model = test_batch_quantized(args, model)
     test_tar_quantized, test_pre_quantized = test(quantized_model, test_loader)
     OA_quantized, AA_mean_quantized, kappa_quantized, AA_quantized = output_metric(test_tar_quantized, test_pre_quantized)
 
-    #Print details
-    print("Quantized model - OA: {:.4f}, AA: {:.4f}, Kappa: {:.4f}".format(OA_quantized, AA_mean_quantized, kappa_quantized))
-    per_class_acc_quantized = class_accuracy_percent(test_tar_quantized, test_pre_quantized, num_classes)
-    for c in range(num_classes):
-        print("Quantized model - Class {}: {:.4f}%".format(c + 1, per_class_acc_quantized[c]))
+    # #Print details
+    # print("Quantized model - OA: {:.4f}, AA: {:.4f}, Kappa: {:.4f}".format(OA_quantized, AA_mean_quantized, kappa_quantized))
+    # per_class_acc_quantized = class_accuracy_percent(test_tar_quantized, test_pre_quantized, num_classes)
+    # for c in range(num_classes):
+    #     print("Quantized model - Class {}: {:.4f}%".format(c + 1, per_class_acc_quantized[c]))
     
+    results = {
+        'model' : 'MViT',
+        'dataset': args.dataset,
+        'OA': OA,
+        'AA': AA_mean,
+        'Kappa': kappa,
+        'OA_quantized': OA_quantized,
+        'AA_quantized': AA_mean_quantized,
+        'Kappa_quantized': kappa_quantized,
+        **getClassOutput(test_tar, is_quantized=False),
+        **getClassOutput(test_tar_quantized, is_quantized=True),
+    }
 
+    for key, value in results.items():
+        print(f"{key}: {value}")
 
-    # output = {
-    #     'model' : 'MViT',
-    #     'dataset': args.dataset,
-    #     'OA': OA,
-    #     'AA': AA_mean,
-    #     'Kappa': kappa,
-    #     'per_class_acc': per_class_acc,
-    #     # 'training_time': toc - tic
-    # }
+    if args.wandb_mode != 'disabled':
+        wandb.log(results)
+        wandb.finish()

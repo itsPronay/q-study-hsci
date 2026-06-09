@@ -1,3 +1,4 @@
+from matplotlib.pylab import shape
 import torch 
 import torch.nn as nn
 import argparse
@@ -7,6 +8,7 @@ import scipy.io as sio
 # from spectralFormer.train import run as run_spectralformer
 from spectralSpacialMamba.run import run as run_mamba
 from mvit.run import run_mvit
+from spectralFormer.train import train_spectralformer
 
 
 parser = argparse.ArgumentParser(description='Study quantization of different models on hyperspectral image classification')
@@ -92,16 +94,17 @@ args = parser.parse_args()
 def main():
     if not os.path.exists('classification_maps'):
         os.makedirs('classification_maps')
-    # wandb.init(
-    #     project = args.project_name,
-    #     # name = f"Input shape: {shape}, Device: {args.ai_hub_device}, mode: {args.mode}",
-    #     mode = args.wandb_mode,
-    #     config = vars(args)
-    # )
+        
+    if args.wandb_mode != 'disabled':
+        wandb.init(
+            project = args.wandb_project,
+            name = f"{args.model}_{args.dataset}_quantization_{args.nbits}bits_group{args.group_size}",
+            mode = args.wandb_mode,
+            config = vars(args)
+        )
 
     if args.model == 'SpectralFormer':
-        print('Training SpectralFormer...')
-        # run_spectralformer(args)
+        train_spectralformer(args)
     elif args.model == 'SpectralSpacialMamba':
         run_mamba(args)
     elif args.model == 'mvit':
