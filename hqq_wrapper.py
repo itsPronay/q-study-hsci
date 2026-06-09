@@ -174,12 +174,12 @@ def replace_all_linear_with_hqq_safe(
         child_module  = getattr(parent_module, child_name)
 
         # safe group_size check
-        total_elements = child_module.weight.numel()
-        if group_size is not None and total_elements % group_size != 0:
-            print(f"[HQQ] {full_name}: {child_module.weight.shape} not divisible by group_size={group_size}, falling back to group_size=None")
-            effective_gs = None
-        else:
-            effective_gs = group_size
+        # total_elements = child_module.weight.numel()
+        # if group_size is not None and total_elements % group_size != 0:
+        #     print(f"[HQQ] {full_name}: {child_module.weight.shape} not divisible by group_size={group_size}, falling back to group_size=None")
+        #     effective_gs = None
+        # else:
+        effective_gs = group_size
 
         quant_config = BaseQuantizeConfig(nbits=nbits, group_size=effective_gs)
 
