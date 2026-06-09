@@ -366,8 +366,8 @@ def train_spectralformer(args):
         'OA_quantized': OA_quantized,
         'AA_quantized': AA_mean_quantized,
         'Kappa_quantized': kappa_quantized,
-        **getClassOutputForEachClass(per_class_acc),
-        **getClassOutputForEachClass(per_class_acc_quantized, is_quantized=True),
+        **getClassOutputForEachClass(args.dataset, per_class_acc),
+        **getClassOutputForEachClass(args.dataset, per_class_acc_quantized, is_quantized=True),
     }
 
     for key, value in results.items():

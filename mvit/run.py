@@ -165,8 +165,8 @@ def run_mvit(args):
         'OA_quantized': OA_quantized,
         'AA_quantized': AA_mean_quantized,
         'Kappa_quantized': kappa_quantized,
-        **getClassOutputForEachClass(class_acc),
-        **getClassOutputForEachClass(clas_acc_quantized, is_quantized=True),
+        **getClassOutputForEachClass(args.dataset, class_acc),
+        **getClassOutputForEachClass(args.dataset, clas_acc_quantized, is_quantized=True),
     }
 
     for key, value in results.items():

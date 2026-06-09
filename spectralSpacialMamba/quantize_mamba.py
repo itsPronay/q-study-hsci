@@ -10,7 +10,8 @@ def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass,
     getParamCount(model, printLayers=True)
 
     MAMBA_EXCLUDE_LAYERS = [
-        "dt_proj",    # directly accesses .weight in forward_core line 248
+        "cls_head",  # classification head
+        # "dt_proj",    # directly accesses .weight in forward_core line 248
         # "x_proj",     # same issue
         # "out_proj",   # same issue
         "linear",     # 299x299 = 89401, not divisible by any group size
