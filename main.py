@@ -34,8 +34,8 @@ parser.add_argument('--nbits', type=int, default=8)
 parser.add_argument('--print_layers', type=int, default=0) # 0 for false, 1 for true
 parser.add_argument('--print_quantization_summary', type=int, default=1) # 0 for false, 1 for true
 parser.add_argument('--group_size', type=lambda x: None if x.lower() == 'none' else int(x), default=64)
-parser.add_argument('--del_orig', action='store_true', help='if True, delete the original Linear weight inside HQQLinear')
-parser.add_argument('--verbose', action='store_true', help='if True, print replacement information')
+parser.add_argument('--del_orig', type=lambda x: x.lower() == 'true', default=True, help='if True, delete the original Linear weight inside HQQLinear')
+parser.add_argument('--verbose', type=lambda x: x.lower() == 'true', default=True, help='if True, print replacement information')
 parser.add_argument('--exclude_names', nargs='*', default=[], help='List of module names to exclude from quantization, e.g., "blocks.11.mlp.fc1 blocks.11.mlp.fc2"')
 
 
