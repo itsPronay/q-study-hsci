@@ -43,7 +43,7 @@ DATASETS = {
         ],
     },
     'Indian':{
-        "datakey": "indian_pines", #key of data in .mat file
+        "datakey": "indian_pines_corrected", #key of data in .mat file
         "labelkey": "indian_pines_gt", #key of label in .mat file
         "files" : [
             ( "indian_pines_corrected.mat", "http://www.ehu.eus/ccwintco/uploads/6/67/Indian_pines_corrected.mat"),
@@ -53,7 +53,6 @@ DATASETS = {
     'Houston': { }
 }
 
-#
 #
 # this function will download the dataset if not already downloaded, and load the data and label from the .mat files
 # Supported datasets are UP, NF, HC, Pavia, Indian. For Houston dataset
