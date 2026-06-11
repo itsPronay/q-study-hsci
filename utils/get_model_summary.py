@@ -3,10 +3,12 @@ from pyexpat import model
 import numpy as np
 import torch
 from hqq.core.quantize import HQQLinear
+import torch.nn as nn
 
 
 def getParamCount(model, printLayers=False):
     total_param = 0
+    print("\n[INFO] __________________________________________Printing all Layers with Param size:__________________________________________")
     for name, param in model.named_parameters():
         if param.requires_grad:
             num_param = np.prod(param.size())
@@ -17,7 +19,19 @@ def getParamCount(model, printLayers=False):
             total_param += num_param
     
     print("\nTotal Trainable Parameters:", total_param)
+    printAllLinearLayers(model)
     return total_param
+
+def printAllLinearLayers(model):
+    print("\n[INFO] __________________________________________Printing all Linear Layers:__________________________________________")
+    total_linear_layers = 0
+    for name, module in model.named_modules():
+        if isinstance(module, nn.Linear):
+            print(name, module.weight.shape)
+            total_linear_layers += 1
+    print(f"\nTotal Linear layers: {total_linear_layers}")
+    print("__________________________________________________________________________________________________________________________")
+
 
 def printWeightStatistics(model):
     print("\n[INFO] __________________________________________Model Weight Statistics:__________________________________________")
