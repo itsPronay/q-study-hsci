@@ -7,14 +7,17 @@ from utils.get_model_summary import getParamCount, print_quantization_summary, p
 
 
 def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass, nvalid_perClass, halfsize,):
-    getParamCount(model, printLayers=True)
+     # check if model has been quantized
+    if args.print_quantization_summary:
+        print("\n[INFO]__________________________________ Model after quantization: __________________________________")
+        getParamCount(model, printLayers=args.print_layers)
+        print_quantization_summary(model)
 
     MAMBA_EXCLUDE_LAYERS = [
         "dt_proj",    # directly accesses .weight in forward_core line 248, so had to exclude
         "linear",     # 299x299 = 89401, not divisible by any group size, excluded 
         "head",       # classification head
     ]
-
 
     model = hqq_wrapper.replace_all_linear_with_hqq_safe(
         model=model,
@@ -25,12 +28,6 @@ def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass,
         verbose=args.verbose,
         exclude_names=MAMBA_EXCLUDE_LAYERS,
     )
-
-      # check if model has been quantized
-    if args.print_quantization_summary:
-        print("\n[INFO]__________________________________ Model after quantization: __________________________________")
-        getParamCount(model, printLayers=args.print_layers)
-        print_quantization_summary(model)
 
     # test quantized model
     model.eval()

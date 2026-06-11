@@ -31,7 +31,7 @@ parser.add_argument('--project_name', type=str, default='Quantization Study')
 
 # quantization specific args
 parser.add_argument('--nbits', type=int, default=8)
-parser.add_argument('--print_layers', type=int, default=0) # 0 for false, 1 for true
+parser.add_argument('--print_layers', type=int, default=1) # 0 for false, 1 for true
 parser.add_argument('--print_quantization_summary', type=int, default=1) # 0 for false, 1 for true
 parser.add_argument('--group_size', type=lambda x: None if x.lower() == 'none' else int(x), default=64)
 parser.add_argument('--del_orig', type=lambda x: x.lower() == 'true', default=True, help='if True, delete the original Linear weight inside HQQLinear')
