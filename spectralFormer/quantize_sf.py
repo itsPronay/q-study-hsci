@@ -9,11 +9,9 @@ from utils.get_model_summary import getParamCount, printWeightStatistics, print_
 def test_batch_quantized(args, model):
 
     if args.print_quantization_summary:
-        print("\n[INFO]__________________________________ Model after quantization: __________________________________")
+        print("\n[INFO]__________________________________ Printing model summary before quantization __________________________________")
         getParamCount(model, printLayers=args.print_layers)
-        print_quantization_summary(model)
 
-        
     exclude_layers = [
         "mlp_head",
         "patch_to_embedding" # fails for group_size = 64
@@ -30,5 +28,9 @@ def test_batch_quantized(args, model):
         verbose=args.verbose,
         exclude_names=exclude_layers,
     )
+
+    if args.print_quantization_summary:
+        print("\n[INFO]__________________________________ Model after quantization: __________________________________")
+        print_quantization_summary(model)
 
     return model

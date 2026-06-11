@@ -9,9 +9,8 @@ from utils.get_model_summary import getParamCount, print_quantization_summary, p
 def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass, nvalid_perClass, halfsize,):
      # check if model has been quantized
     if args.print_quantization_summary:
-        print("\n[INFO]__________________________________ Model after quantization: __________________________________")
+        print("\n[INFO]__________________________________ Printing model summary before quantization __________________________________")
         getParamCount(model, printLayers=args.print_layers)
-        print_quantization_summary(model)
 
     MAMBA_EXCLUDE_LAYERS = [
         "dt_proj",    # directly accesses .weight in forward_core line 248, so had to exclude
@@ -31,6 +30,10 @@ def test_batch_quantized(args, model, image, index, BATCH_SIZE, nTrain_perClass,
 
     # test quantized model
     model.eval()
+
+    if args.print_quantization_summary:
+        print("\n[INFO]__________________________________ Model after quantization: __________________________________")
+        print_quantization_summary(model)
 
     true_cla_q, oa_q, aa_q, kappa_q, cm_q, pred_q = test_batch(
         model, image, index, BATCH_SIZE, nTrain_perClass, nvalid_perClass, halfsize

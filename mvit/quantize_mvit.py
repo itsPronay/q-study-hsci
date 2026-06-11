@@ -9,9 +9,8 @@ from utils.get_model_summary import getParamCount, print_quantization_summary, p
 def test_batch_quantized(args, model):
     # check if model has been quantized
     if args.print_quantization_summary:
-        print("\n[INFO]__________________________________ Model after quantization: __________________________________")
+        print("\n[INFO]__________________________________ Printing model summary - before quantization __________________________________")
         getParamCount(model, printLayers=args.print_layers)
-        print_quantization_summary(model)
 
     exclude_layers = [
         "cls_head"
@@ -31,5 +30,9 @@ def test_batch_quantized(args, model):
         verbose=args.verbose,
         exclude_names=exclude_layers,
     )
+
+    if args.print_quantization_summary:
+        print("\n[INFO]__________________________________ Model after quantization: __________________________________")
+        print_quantization_summary(model)
 
     return model
