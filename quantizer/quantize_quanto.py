@@ -38,5 +38,5 @@ def quanto_quantization(args, model):
     qtype = NBITS_MAP.get(args.nbits)
 
     quantize(model, weights=qtype, exclude=exclude_layers)
-    freeze(model)
+    # freeze(model)
     return model
