@@ -49,8 +49,6 @@ parser.add_argument('--learning_rate', type=float, default=1e-3)
 parser.add_argument('--patches', type=int, default=7)
 parser.add_argument('--band_patch', type=int, default=1)
 parser.add_argument('--pca_band', type=int, default=30)
-parser.add_argument('--lr', type=float, default=5e-4)
-parser.add_argument('--learning_rate', type=float, default=1e-3)
 parser.add_argument('--weight_decay', type=float, default=1e-4)
 parser.add_argument('--gamma', type=float, default=0.9)
 parser.add_argument('--drop_rate', type=float, default=0.0)
@@ -103,6 +101,11 @@ def main():
             config = vars(args)
         )
 
+    print("*****************************************************************")
+    print("Printing All Arguments:")
+    for arg in vars(args):
+        print(f"{arg}: {getattr(args, arg)}")
+    print("*****************************************************************")
 
     # Load data
     data, label = downloadAndLoadDataset(args.dataset)
