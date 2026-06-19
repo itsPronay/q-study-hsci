@@ -46,7 +46,7 @@ parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'Pavia', '
 parser.add_argument('--batch_size', type=int, default=512)
 parser.add_argument('--epoch', type=int, default=100)
 parser.add_argument('--learning_rate', type=float, default=1e-3)
-parser.add_argument('--patch_size', type=int, default=7)
+parser.add_argument('--patch_size', type=int, default=15)
 parser.add_argument('--band_patch', type=int, default=1)
 parser.add_argument('--pca_band', type=int, default=30)
 parser.add_argument('--weight_decay', type=float, default=1e-4)
@@ -69,7 +69,7 @@ parser.add_argument('--verbose', type=lambda x: x.lower() == 'true', default=Tru
 
 # these are the args for spectralSpacialMamba specifically, 
 # Pre training
-parser.add_argument('--windowsize', type=int, default=21) # 13 * 2 + 1 = 27 ---- 7 * 2 + 1 = 15
+parser.add_argument('--windowsize', type=int, default=27) # 13 * 2 + 1 = 27 ---- 7 * 2 + 1 = 15
 parser.add_argument('--type', type=str, default='none')
 parser.add_argument('--spe_windowsize', type=int, default=3)
 parser.add_argument('--hid_chans', type=int, default=64)
