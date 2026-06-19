@@ -1,5 +1,13 @@
 import numpy as np
+from sklearn.decomposition import PCA
 
+
+def applyPCA(data, numComponents=30):
+    new_data = np.reshape(data, (-1, data.shape[2]))
+    pca = PCA(n_components=numComponents, whiten=True)
+    new_data = pca.fit_transform(new_data)
+    new_data = np.reshape(new_data, (data.shape[0], data.shape[1], numComponents))
+    return new_data, pca
 
 def choose_all_pixels(groundtruth):
     pos_forward = np.argwhere(groundtruth != 0)

@@ -88,47 +88,6 @@ def class_accuracy_percent(tar, pre, num_classes):
     return accuracies
 
 
-def valid(model, valid_loader, criterion):
-    objs = AverageMeter()
-    top1 = AverageMeter()
-    with torch.no_grad():
-        for batch_idx, (batch_data, batch_target) in enumerate(valid_loader):
-            batch_data = batch_data.cuda()
-            batch_target = batch_target.cuda()   
-    
-            batch_pred, batch_recon = model(batch_data, batch_target)  # (13, 13, 16)
-            loss = criterion(batch_pred, batch_target, batch_data, batch_recon)
-            
-            batch_pred = safe_norm(batch_pred, axis=-1)  # (13, 13)
-            prec1, t, p = accuracy(batch_pred, batch_target, topk=(1,))
-            n = batch_data.shape[0]
-            objs.update(loss.data, n)  # Calculate the average loss of all training samples
-            top1.update(prec1[0].data, n)  # Calculate the average accuracy of all training samples
-    return top1.avg, objs.avg
-
-
-def train(model, train_loader, criterion, optimizer):
-    model.train()
-    objs = AverageMeter()
-    top1 = AverageMeter()
-    for batch_idx, (batch_data, batch_target) in enumerate(train_loader):
-        batch_data = batch_data.cuda()
-        batch_target = batch_target.cuda()   
-        
-        optimizer.zero_grad()
-        batch_pred, batch_recon = model(batch_data, batch_target)  # (13, 13, 16)
-        loss = criterion(batch_pred, batch_target, batch_data, batch_recon)
-        loss.backward()
-        optimizer.step()
-        
-        batch_pred = safe_norm(batch_pred, axis=-1)  # (13, 13)
-        prec1, t, p = accuracy(batch_pred, batch_target, topk=(1,))
-        n = batch_data.shape[0]
-        objs.update(loss.data, n)  # Calculate the average loss of all training samples
-        top1.update(prec1[0].data, n)  # Calculate the average accuracy of all training samples
-    return top1.avg, objs.avg
-
-
 def plot_confusion_matrix(dataset, cm, path, cmap=mpl.cm.PuBu_r, normalize=True, dpi=300):
     font_style = dict(family='DejaVu Sans', weight='black', size=15)
     font_style_ticks = dict(family='DejaVu Sans', size=15)

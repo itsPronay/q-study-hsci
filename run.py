@@ -30,15 +30,14 @@ from utils.data_prepare import choose_train_and_test
 from utils.data_prepare import choose_all_pixels, all_data
 from utils.data_prepare import train_and_test_data, train_and_test_label
 
-from utils import applyPCA, output_metric
-from utils.train_utils import train, test, valid
+from utils.data_prepare import applyPCA
+from utils.train_utils import train, test, valid, output_metric, class_accuracy_percent
 from utils.download_dataset import downloadAndLoadDataset
-from utils.train_utils import class_accuracy_percent
 from spectralSpacialMamba.quantize_mamba import getParamCount
 from utils.load_model import model_loader
 from utils.get_model_summary import print_quantization_summary
 
-from quantizer.hqq_wrapper import quantize_model
+from quantizer.quantize_hqq import quantize_model
 
 parser = argparse.ArgumentParser(description='Quantization study')
 

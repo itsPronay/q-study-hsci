@@ -6,6 +6,7 @@ import matplotlib as mpl
 from matplotlib import colors
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix
 
 
 class AverageMeter(object):
@@ -20,6 +21,42 @@ class AverageMeter(object):
         self.cnt += n
         self.avg = self.sum / self.cnt
 
+def output_metric(tar, pre):
+    matrix = confusion_matrix(tar, pre)
+    OA, AA_mean, Kappa, AA = cal_results(matrix)
+    return OA, AA_mean, Kappa, AA
+
+def cal_results(matrix):
+    shape = np.shape(matrix)  # 13 * 13
+    number = 0
+    total_sum = 0
+    AA = np.zeros([shape[0]], dtype=float)  # (13, )
+    for i in range(shape[0]):
+        number += matrix[i, i]
+        AA[i] = matrix[i, i] / np.sum(matrix[i, :])  # recall ratio
+        total_sum += np.sum(matrix[i, :]) * np.sum(matrix[:, i])
+    OA = number / np.sum(matrix)
+    AA_mean = np.mean(AA)
+    pe = total_sum / (np.sum(matrix) ** 2)
+    Kappa = (OA - pe) / (1 - pe)
+    return OA, AA_mean, Kappa, AA
+
+def class_accuracy_percent(tar, pre, num_classes):
+    accuracies = {}
+
+    for c in range(num_classes):
+        idx = (tar == c)
+        total = idx.sum()
+
+        if total == 0:
+            acc = 0.0
+        else:
+            correct = (pre[idx] == c).sum()
+            acc = (correct / total) * 100  # convert to percentage
+
+        accuracies[c] = acc
+
+    return accuracies
 
 def accuracy(output, target, topk=(1,)):
     # output: (batch, 13)
