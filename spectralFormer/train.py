@@ -10,7 +10,7 @@ from torch.autograd import Variable
 import wandb
 from .vit_pytorch import ViT
 from sklearn.metrics import confusion_matrix
-from download_dataset import downloadAndLoadDataset
+from utils.download_dataset import downloadAndLoadDataset
 from mvit.data_prepare import choose_train_and_test
 from mvit.CNNUtils import train, test, valid
 from .quantize_sf import test_batch_quantized
@@ -227,7 +227,7 @@ def test_epoch(model, test_loader, criterion, optimizer):
 #-------------------------------------------------------------------------------
 
 def train_spectralformer(args):
-    from download_dataset import downloadAndLoadDataset
+    from utils.download_dataset import downloadAndLoadDataset
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed(args.seed)

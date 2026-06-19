@@ -1,6 +1,6 @@
 import torch
 from hqq.core.quantize import BaseQuantizeConfig
-import hqq_wrapper
+import quantizer.hqq_wrapper as hqq_wrapper
 from spectralSpacialMamba.utils import test_batch
 import numpy as np
 from utils.get_model_summary import getParamCount, print_quantization_summary, printWeightStatistics
@@ -33,6 +33,7 @@ def test_batch_quantized(args, model):
 
     if args.print_quantization_summary:
         print("\n[INFO]__________________________________ Model after quantization: __________________________________")
+        print(model) #todo
         print_quantization_summary(model)
 
     return model

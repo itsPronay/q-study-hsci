@@ -3,6 +3,11 @@ import urllib.request
 import zipfile
 import subprocess
 from scipy.io import loadmat 
+import os
+import zipfile
+import requests
+import scipy.io as sio
+
 
 DATASETS = {
     "UP": {
@@ -30,22 +35,27 @@ DATASETS = {
         ],
     },
     "Pavia": {
-        "datakey": "pavia",
-        "labelkey": "pavia_gt",
-        "url": "https://www.kaggle.com/api/v1/datasets/download/syamkakarla/pavia-university-hsi",
-        "type": "zip",
-        "unzipped_file_names": ["Pavia.mat", "Pavia_gt.mat"] #after unzipping, the files we expect to find in the extracted folder
+        "datakey": "paviaU",
+        "labelkey": "paviaU_gt",
+        "files": [
+            ("PaviaU.mat", "http://www.ehu.eus/ccwintco/uploads/e/ee/PaviaU.mat"),
+            ("PaviaU_gt.mat", "http://www.ehu.eus/ccwintco/uploads/5/50/PaviaU_gt.mat")
+        ],
     },
     'Indian':{
-        "datakey": "indian_pines", #key of data in .mat file
+        "datakey": "indian_pines_corrected", #key of data in .mat file
         "labelkey": "indian_pines_gt", #key of label in .mat file
-        "url" : "https://www.kaggle.com/api/v1/datasets/download/emannasserabdelhafez/indian-pines",
-        "type": "zip",
-        "unzipped_file_names": ["indian_pines_corrected.mat", "indian_pines_gt.mat"] #after unzipping, the files we expect to find in the extracted folder
-    }
+        "files" : [
+            ( "indian_pines_corrected.mat", "http://www.ehu.eus/ccwintco/uploads/6/67/Indian_pines_corrected.mat"),
+            ( "indian_pines_gt.mat", "http://www.ehu.eus/ccwintco/uploads/c/c4/Indian_pines_gt.mat"),
+        ],
+    },
+    'Houston': { }
 }
 
 
+# this function will download the dataset if not already downloaded, and load the data and label from the .mat files
+# Supported datasets are UP, NF, HC, Pavia, Indian. For Houston dataset
 def downloadAndLoadDataset(dataset_name, save_folder='dataset'):
     if dataset_name not in DATASETS:
         raise ValueError(f"Dataset {dataset_name} not found")
@@ -53,8 +63,8 @@ def downloadAndLoadDataset(dataset_name, save_folder='dataset'):
     dataset = DATASETS[dataset_name]
 
     # load pavia type dataset from kaggle
-    if dataset.get('type') == 'zip':
-        return _loadDataFromKaggle(dataset, save_folder)
+    if dataset_name == 'Houston':
+        return load_houston()
 
     save_dir = os.path.join(os.getcwd(), save_folder)
     os.makedirs(save_dir, exist_ok=True)
@@ -85,70 +95,44 @@ def downloadAndLoadDataset(dataset_name, save_folder='dataset'):
         dataset["labelkey"]
     )
 
+def load_houston(download_dir="./dataset"):
+    os.makedirs(download_dir, exist_ok=True)
 
-# Todo 
-def _loadDataFromKaggle(dataset, save_folder):
-    # Handle Kaggle datasets (zip files)
-    dataset_name = dataset.get("datakey", "dataset")
-    
-    # Create full save directory path
-    save_dir = os.path.join(os.getcwd(), save_folder)
-    os.makedirs(save_dir, exist_ok=True)
-    
-    zip_filename = f"{dataset_name}-kaggle.zip"
-    zip_path = os.path.join(save_dir, zip_filename)
-    
-    # Download using curl
+    zip_path = os.path.join(download_dir, "houston.zip")
+
+    # Download
     if not os.path.exists(zip_path):
-        print(f"Downloading {dataset_name} dataset using curl...")
-        curl_cmd = ["curl", "-L", "-o", zip_path, dataset["url"]]
-        subprocess.run(curl_cmd, check=True)
-        print(f"Done ({os.path.getsize(zip_path)/(1024*1024):.2f} MB)")
+        print("⬇ Downloading Houston dataset...")
+        response = requests.get(
+            "https://www.kaggle.com/api/v1/datasets/download/mingliu123/houston",
+            stream=True
+        )
+        response.raise_for_status()
+        with open(zip_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        print("✅ Downloaded")
     else:
-        print(f"{dataset_name} zip file already exists, skipping download.")
-    
-    # Create extraction marker to track if already extracted
-    extraction_marker = os.path.join(save_dir, f".{dataset_name}_extracted")
-    
-    # Extract zip file directly to save_dir (no subfolder)
-    if not os.path.exists(extraction_marker):
-        print(f"Extracting {dataset_name} dataset...")
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(save_dir)
-        # Create marker file to indicate extraction is complete
-        with open(extraction_marker, 'w') as f:
-            f.write("extracted")
-        print("Extraction completed.")
+        print("✅ Already downloaded")
+
+    # Unzip
+    if not os.path.exists(os.path.join(download_dir, "data.mat")):
+        print("📦 Unzipping...")
+        with zipfile.ZipFile(zip_path, "r") as z:
+            z.extractall(download_dir)
+        print("✅ Unzipped")
     else:
-        print(f"{dataset_name} dataset already extracted, skipping.")
-    
-    # Find files using unzipped_file_names
-    unzipped_file_names = dataset.get("unzipped_file_names", [])
-    if not unzipped_file_names:
-        raise ValueError(f"unzipped_file_names not specified for {dataset_name}")
-    
-    data_file = None
-    label_file = None
-    
-    # Search recursively for the specified files in save_dir
-    for root, dirs, files in os.walk(save_dir):
-        for file in files:
-            if file in unzipped_file_names:
-                file_path = os.path.join(root, file)
-                if 'gt' in file.lower():
-                    label_file = file_path
-                else:
-                    data_file = file_path
-    
-    if not data_file or not label_file:
-        print(f"ERROR: Could not find expected files in {dataset_name}:")
-        print(f"  Looking for: {unzipped_file_names}")
-        print(f"  Data file found: {data_file}")
-        print(f"  Label file found: {label_file}")
-        raise FileNotFoundError(f"Could not find expected files {unzipped_file_names} in extracted {dataset_name} dataset")
-    
-    print(f"\n{dataset_name} download and extraction completed.")
-    return _loadDataset(data_file, label_file, dataset["datakey"], dataset["labelkey"])
+        print("✅ Already unzipped")
+
+    # Load
+    data   = sio.loadmat(os.path.join(download_dir, "data.mat"))["data"]
+    labels = sio.loadmat(os.path.join(download_dir, "mask_train.mat"))["mask_train"]
+
+    print(f"   Data   shape : {data.shape}   dtype: {data.dtype}")
+    print(f"   Labels shape : {labels.shape}  dtype: {labels.dtype}")
+
+    return data, labels
+
 
 def _loadDataset(data_path, label_path, datakey, labelkey):
     data = loadmat(data_path)[datakey]

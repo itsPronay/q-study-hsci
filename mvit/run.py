@@ -35,7 +35,7 @@ from .utils import applyPCA, output_metric, plot_confusion_matrix
 from .CNNUtils import train, test, valid
 from .utils import list_to_colormap, classification_map, print_args
 from .utils import ActivationOutputData
-from download_dataset import downloadAndLoadDataset
+from utils.download_dataset import downloadAndLoadDataset
 from .model import MViT
 from .utils import class_accuracy_percent
 from .quantize_mvit import test_batch_quantized
@@ -117,6 +117,24 @@ def run_mvit(args):
     os.makedirs('./model', exist_ok=True)
     path = './model/mvit.pt'
     tic = time.time()
+
+
+
+
+
+
+
+
+
+    # todo print model 
+
+
+
+
+
+
+
+
     for epoch in range(args.epoch):
         # 计算的是移动平均准确率
         train_acc, train_loss = train(model, train_loader, criterion, optimizer)
