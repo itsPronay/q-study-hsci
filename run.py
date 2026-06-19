@@ -37,12 +37,15 @@ from spectralSpacialMamba.quantize_mamba import getParamCount
 from utils.load_model import model_loader
 from utils.get_model_summary import print_quantization_summary
 
-from quantizer.quantize_hqq import quantize_model
+from quantizer.quantize_hqq import hqq_quantization
+from quantizer.quantize_quanto import quanto_quantization
+
 
 parser = argparse.ArgumentParser(description='Quantization study')
 
 parser.add_argument('--model', type=str,choices=['SpectralFormer', 'SpectralSpacialMamba', 'mvit'], default='SpectralSpacialMamba')
 parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'Pavia', 'Indian', 'Houston'], default='UP')
+parser.add_argument('--quant_method', type=str, choices=['hqq', 'quanto'], default='hqq')
 parser.add_argument('--batch_size', type=int, default=512)
 parser.add_argument('--epoch', type=int, default=100)
 parser.add_argument('--learning_rate', type=float, default=1e-3)
@@ -210,11 +213,15 @@ def main():
     test_tar, test_pre = test(model, test_loader)
     OA, AA_mean, kappa, AA = output_metric(test_tar, test_pre)
 
-    # quantize model and test 
-    quantized_model = quantize_model(args, model)
-    if args.print_quantization_summary:
-        print("\n[INFO]__________________________________ Model after quantization: __________________________________")
-        print_quantization_summary(model)
+    # quantize model
+    if args.quant_method == 'hqq':
+        quantized_model = hqq_quantization(args, model)
+    elif args.quant_method == 'quanto':
+        quantized_model = quanto_quantization(args, model)
+
+    # if args.print_quantization_summary:
+    #     print("\n[INFO]__________________________________ Model after quantization: __________________________________")
+    #     print_quantization_summary(model)
 
     #test quantized model
     test_tar_quantized, test_pre_quantized = test(quantized_model, test_loader)

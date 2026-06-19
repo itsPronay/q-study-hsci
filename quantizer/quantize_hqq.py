@@ -6,7 +6,7 @@ import numpy as np
 from utils.get_model_summary import getParamCount, print_quantization_summary, printWeightStatistics
 
 
-def quantize_model(args, model):
+def hqq_quantization(args, model):
     # check if model has been quantized
     if args.print_quantization_summary:
         print("\n[INFO]__________________________________ Printing model summary - before quantization __________________________________")
