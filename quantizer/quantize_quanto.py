@@ -1,4 +1,5 @@
 from optimum.quanto import quantize, freeze, qint8, qint4, qint2
+import torch
 
 NBITS_MAP = {
     8: qint8,
@@ -6,13 +7,31 @@ NBITS_MAP = {
     2: qint2
 }
 
+def get_all_exclude_layers(model, exclude_names=None):
+    if exclude_names is None:
+        exclude_names = []
+
+    exclude_layer_names = list(exclude_names)  # start with manually excluded layers
+
+    # quanto only supports Linear, Conv2d, and LayerNorm
+    # so getting all other layers to exclude them from quantization
+    for name, module in model.named_modules():
+        if name == '':  # skip root module
+            continue
+        if not isinstance(module, (torch.nn.Linear, torch.nn.Conv2d, torch.nn.LayerNorm)):
+            exclude_layer_names.append(name)
+
+    return exclude_layer_names
+
+
 def quanto_quantization(args, model):
     exclude_layers = []
-    
-    if args.model == 'mvit':
-        exclude_layers = ['cls_head']
-    
-    quantize(model, weights=NBITS_MAP.get(args.nbits), exclude=exclude_layers)
 
+    if args.model == 'mvit':
+        exclude_layers = get_all_exclude_layers(model, exclude_names=['cls_head'])
+
+    qtype = NBITS_MAP.get(args.nbits)
+
+    quantize(model, weights=qtype, exclude=exclude_layers)
     freeze(model)
     return model
