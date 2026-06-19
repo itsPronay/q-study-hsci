@@ -7,11 +7,11 @@ NBITS_MAP = {
     2: qint2
 }
 
-def get_all_exclude_layers(model, exclude_names=None):
-    if exclude_names is None:
-        exclude_names = []
+def get_all_exclude_layers(model, also_exclude_names=None):
+    if also_exclude_names is None:
+        also_exclude_names = []
 
-    exclude_layer_names = list(exclude_names)  # start with manually excluded layers
+    exclude_layer_names = list(also_exclude_names)  # start with manually excluded layers
 
     # quanto only supports Linear, Conv2d, and LayerNorm
     # so getting all other layers to exclude them from quantization
@@ -28,7 +28,12 @@ def quanto_quantization(args, model):
     exclude_layers = []
 
     if args.model == 'mvit':
-        exclude_layers = get_all_exclude_layers(model, exclude_names=['cls_head'])
+        exclude_layers = [
+            "cls_head",
+            "conv2d.0"
+        ]
+
+    exclude_layers = get_all_exclude_layers(model, also_exclude_names=exclude_layers)
 
     qtype = NBITS_MAP.get(args.nbits)
 

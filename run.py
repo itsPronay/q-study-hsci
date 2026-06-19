@@ -109,6 +109,7 @@ def main():
     print("*****************************************************************")
     for arg in vars(args):
         print(f"{arg}: {getattr(args, arg)}")
+    print("*****************************************************************")
 
     # Load data
     data, label = downloadAndLoadDataset(args.dataset)
