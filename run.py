@@ -173,6 +173,7 @@ def main():
     print("*****************************************************************")
     print(model)
     getParamCount(model, printLayers=False)
+    print("*****************************************************************")
 
     print('started training')
     acc_list = [0.00]

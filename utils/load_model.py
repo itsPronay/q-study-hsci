@@ -5,7 +5,7 @@ import torch.nn as nn
 
 def model_loader(args, num_class):
     if args.model == 'mvit':
-        model = MViT(num_class = num_class).cuda()
+        model = MViT(num_classes = num_class).cuda()
     elif args.model == 'spectralFormer':
         model = ViT(
             image_size = args.patches_sf,
