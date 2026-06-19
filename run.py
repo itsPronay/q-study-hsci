@@ -239,3 +239,6 @@ def main():
     if args.wandb_mode != 'disabled':
         wandb.log(results)
         wandb.finish()
+
+if __name__ == "__main__":
+    main()
