@@ -103,9 +103,9 @@ def main():
 
     print("*****************************************************************")
     print("Printing All Arguments:")
+    print("*****************************************************************")
     for arg in vars(args):
         print(f"{arg}: {getattr(args, arg)}")
-    print("*****************************************************************")
 
     # Load data
     data, label = downloadAndLoadDataset(args.dataset)
@@ -170,9 +170,9 @@ def main():
 
     print("*****************************************************************")
     print("Printing Model:")
+    print("*****************************************************************")
     print(model)
     getParamCount(model, printLayers=False)
-    print("*****************************************************************")
 
     print('started training')
     acc_list = [0.00]
@@ -197,8 +197,9 @@ def main():
             acc_list[-1] = acc_list[-2]
 
     toc = time.time()
+    print("*****************************************************************")
     print("Running Time: {:.2f}".format(toc-tic))
-    print("**************************************************")
+    print("*****************************************************************")
 
     print("started testing")
     model.load_state_dict(torch.load(path))
