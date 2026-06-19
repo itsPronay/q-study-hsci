@@ -20,7 +20,7 @@ def model_loader(args, num_class):
             emb_dropout = 0.1,
             mode = 'CAF'
         ).cuda()
-    elif args.model == 'spectralSpacialMamba':
+    elif args.model == 'SpectralSpacialMamba':
         model = mamba_SS_model(
             spa_img_size=(args.windowsize, args.windowsize),
             spe_img_size=(args.spe_windowsize,args.spe_windowsize), 
