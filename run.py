@@ -160,7 +160,7 @@ def main():
     test_loader = Data.DataLoader(test_label, batch_size=args.batch_size, shuffle=True)
     valid_loader = Data.DataLoader(valid_label, batch_size=args.batch_size, shuffle=True)
 
-    model = model_loader(args, num_classes=num_classes)
+    model = model_loader(args, num_class=num_classes)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(
