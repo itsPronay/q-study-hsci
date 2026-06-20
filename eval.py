@@ -41,6 +41,11 @@ def get_args():
     return args
 
 def main():
+    """
+    Main function to run the quantization evaluation.
+    This function loads the saved model, evaluates it on the test set,
+    then applies quantization, and evaluates the quantized model.
+    """ 
     args = get_args()
 
     if args.wandb_mode != 'disabled':
