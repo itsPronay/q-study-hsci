@@ -8,8 +8,8 @@ def model_loader(args, num_class):
         model = MViT(num_classes = num_class).cuda()
     elif args.model == 'SpectralFormer':
         model = ViT(
-            image_size = args.patches_sf,
-            near_band = args.band_patches,
+            image_size = args.patch_size,
+            near_band = args.band_patch,
             num_patches = args.band,
             num_classes = num_class,
             dim = 64,
