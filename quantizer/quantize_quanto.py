@@ -27,7 +27,7 @@ def quanto_quantization(args, model):
     elif args.model == 'mf':
         exclude_layers = [
             "head",
-            "conv" # it is only here for testing, confirm with edwin then remove if not needed
+            "conv2d" # it is only here for testing, confirm with edwin then remove if not needed
         ]
 
     qtype_map = {
