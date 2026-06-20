@@ -18,7 +18,7 @@ from utils.load_model import model_loader
 from utils.get_model_summary import print_quantization_summary
 
 from quantizer.quantize_hqq import hqq_quantization
-from quantizer.quantize_torchao import torchao_quantization
+from quantizer.quantize_quanto import quanto_quantization
 
 from utils.load_model import model_loader
 from train import get_base_args
@@ -122,7 +122,7 @@ def main():
     if args.quant_method == 'hqq':
         quantized_model = hqq_quantization(args, model)
     elif args.quant_method == 'quanto':
-        quantized_model = torchao_quantization(args, model)
+        quantized_model = quanto_quantization(args, model)
 
     if args.print_quantization_summary:
         print("\n[INFO]__________________________________ Model after quantization: __________________________________")

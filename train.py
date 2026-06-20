@@ -10,20 +10,14 @@ import torch
 import torch.nn as nn
 from torch import optim
 import torch.utils.data as Data
-import wandb
 from utils.data_prepare import mirror_hsi
 from utils.data_prepare import choose_train_and_test
 from utils.data_prepare import train_and_test_data, train_and_test_label
-from utils.train_utils import getClassOutputForEachClass
 from utils.data_prepare import applyPCA
-from utils.train_utils import train, test, valid, output_metric, class_accuracy_percent
+from utils.train_utils import train, valid
 from utils.download_dataset import downloadAndLoadDataset
 from utils.get_model_summary import getParamCount
 from utils.load_model import model_loader
-from utils.get_model_summary import print_quantization_summary
-
-from quantizer.quantize_hqq import hqq_quantization
-from quantizer.quantize_torchao import torchao_quantization
 
 
 parser = argparse.ArgumentParser(description='Quantization study')
