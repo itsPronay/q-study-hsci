@@ -78,7 +78,7 @@ class spectral_spatial_block(nn.Module):
             bi = bi,
             cls = cls
             )
-        self.linear = nn.Linear(N, N)
+        # self.linear = nn.Linear(N, N)
         self.norm = norm_layer(embed_dim)
         self.l1= nn.Sequential(
             nn.Linear(embed_dim, embed_dim, bias = False),
