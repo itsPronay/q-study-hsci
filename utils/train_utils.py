@@ -8,6 +8,13 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import confusion_matrix
 
+def getClassOutputForEachClass(prefix, accuracies, is_quantized=False):
+    if is_quantized:
+        prefix = f"({prefix})quant_acc"
+    else:
+        prefix = f"({prefix})_acc"
+    print(accuracies)
+    return {f"{prefix}/class_{i+1}": accuracies[i] for i in range(len(accuracies))}
 
 class AverageMeter(object):
     def __init__(self):

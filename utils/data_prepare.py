@@ -14,7 +14,6 @@ def choose_all_pixels(groundtruth):
     pos_backward = np.argwhere(groundtruth == 0)
     return pos_forward, pos_backward
 
-
 def choose_pretrain(groundtruth, pretrain_proportion=0.2, seed=42):
     rs = np.random.RandomState(seed)
     total_pos_pretrain = np.argwhere(groundtruth != 0)  # Returns an array of positional indices for label 1, 2, ...

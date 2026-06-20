@@ -1,6 +1,6 @@
 from models.mvit import MViT
 from models.spectralFormer import ViT
-from models.hybridFormer import Massformer
+from models.massFormer import Massformer
 from models.spectralSpacialMamba.model import mamba_1D_model, mamba_2D_model, mamba_SS_model
 import torch.nn as nn
 
@@ -37,7 +37,7 @@ def model_loader(args, num_class):
             cls = args.use_cls, 
             fu = args.use_fu
         ).cuda()
-    elif args.model == 'hf':
+    elif args.model == 'mf':
         model = Massformer(num_classes=num_class).cuda()
     else:
         raise Exception('model name could not found')

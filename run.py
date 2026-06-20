@@ -19,21 +19,17 @@ from torch import optim
 import torch.utils.data as Data
 import torch.nn.functional as F
 import wandb
-from spectralFormer.train import train_spectralformer
-from spectralSpacialMamba.run import getClassOutputForEachClass
-from spectralSpacialMamba.run import getClassOutputForEachClass
-from torchsummary import summary
 from einops import rearrange, repeat
 from timm.models.vision_transformer import Block
 from utils.data_prepare import mirror_hsi
 from utils.data_prepare import choose_train_and_test
 from utils.data_prepare import choose_all_pixels, all_data
 from utils.data_prepare import train_and_test_data, train_and_test_label
-
+from utils.train_utils import getClassOutputForEachClass
 from utils.data_prepare import applyPCA
 from utils.train_utils import train, test, valid, output_metric, class_accuracy_percent
 from utils.download_dataset import downloadAndLoadDataset
-from spectralSpacialMamba.quantize_mamba import getParamCount
+from utils.get_model_summary import getParamCount
 from utils.load_model import model_loader
 from utils.get_model_summary import print_quantization_summary
 
@@ -43,7 +39,7 @@ from quantizer.quantize_torchao import torchao_quantization
 
 parser = argparse.ArgumentParser(description='Quantization study')
 
-parser.add_argument('--model', type=str,choices=['sf', 'ssm', 'mvit', 'hf'], default='mvit')
+parser.add_argument('--model', type=str,choices=['sf', 'ssm', 'mvit', 'mf'], default='mvit')
 parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'Pavia', 'Indian', 'Houston'], default='UP')
 parser.add_argument('--quant_method', type=str, choices=['hqq', 'torchao'], default='hqq')
 parser.add_argument('--batch_size', type=int, default=512)
@@ -146,21 +142,21 @@ def main():
 
     # load data
     x_train = torch.from_numpy(x_train.transpose(0, 3, 1, 2)).type(torch.FloatTensor)  
-    if args.model == 'mvit' or args.model == 'hf':
+    if args.model == 'mvit' or args.model == 'mf':
         x_train = x_train.unsqueeze(1)
     print(x_train.shape)
     y_train = torch.from_numpy(y_train).type(torch.LongTensor)  
     train_label = Data.TensorDataset(x_train, y_train)
 
     x_test = torch.from_numpy(x_test.transpose(0, 3, 1, 2)).type(torch.FloatTensor) 
-    if args.model == 'mvit' or args.model == 'hf':
+    if args.model == 'mvit' or args.model == 'mf':
         x_test = x_test.unsqueeze(1)
     print(x_test.shape)
     y_test = torch.from_numpy(y_test).type(torch.LongTensor)  
     test_label = Data.TensorDataset(x_test, y_test)
 
     x_valid = torch.from_numpy(x_valid.transpose(0, 3, 1, 2)).type(torch.FloatTensor)
-    if args.model == 'mvit' or args.model == 'hf':
+    if args.model == 'mvit' or args.model == 'mf':
         x_valid = x_valid.unsqueeze(1)
     print(x_valid.shape)
     y_valid = torch.from_numpy(y_valid).type(torch.LongTensor)
@@ -242,18 +238,27 @@ def main():
     class_acc = class_accuracy_percent(test_tar, test_pre, num_classes)
     clas_acc_quantized = class_accuracy_percent(test_tar_quantized, test_pre_quantized, num_classes)
 
+    if args.model == 'mvit':
+        model_name = 'MViT'
+    elif args.model == 'ssm':
+        model_name = 'SpectralSpacialMamba'
+    elif args.model == 'sf':
+        model_name = 'SpectralFormer'
+    elif args.model == 'mf':
+        model_name = 'MassFormer'
+
     results = {
-        'model' : args.model,
+        'model' : model_name,
         'quantization_method': args.quant_method,
         'dataset': args.dataset,
-        'OA': OA,
-        'AA': AA_mean,
-        'Kappa': kappa,
-        'OA_quantized': OA_quantized,
-        'AA_quantized': AA_mean_quantized,
-        'Kappa_quantized': kappa_quantized,
-        **getClassOutputForEachClass(args.dataset, class_acc),
-        **getClassOutputForEachClass(args.dataset, clas_acc_quantized, is_quantized=True),
+        'OA': OA * 100,
+        'AA': AA_mean * 100,
+        'Kappa': kappa * 100,
+        'OA_quantized': OA_quantized * 100,
+        'AA_quantized': AA_mean_quantized * 100,
+        'Kappa_quantized': kappa_quantized * 100,
+        **getClassOutputForEachClass(args.dataset + '_' + args.model, class_acc),
+        **getClassOutputForEachClass(args.dataset + '_' + args.model, clas_acc_quantized, is_quantized=True),
     }
 
     for key, value in results.items():
