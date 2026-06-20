@@ -146,21 +146,21 @@ def main():
 
     # load data
     x_train = torch.from_numpy(x_train.transpose(0, 3, 1, 2)).type(torch.FloatTensor)  
-    if not args.model == 'SpectralSpacialMamba':
+    if args.model == 'mvit':
         x_train = x_train.unsqueeze(1)
     print(x_train.shape)
     y_train = torch.from_numpy(y_train).type(torch.LongTensor)  
     train_label = Data.TensorDataset(x_train, y_train)
 
     x_test = torch.from_numpy(x_test.transpose(0, 3, 1, 2)).type(torch.FloatTensor) 
-    if not args.model == 'SpectralSpacialMamba':
+    if not args.model == 'mvit':
         x_test = x_test.unsqueeze(1)
     print(x_test.shape)
     y_test = torch.from_numpy(y_test).type(torch.LongTensor)  
     test_label = Data.TensorDataset(x_test, y_test)
 
     x_valid = torch.from_numpy(x_valid.transpose(0, 3, 1, 2)).type(torch.FloatTensor)
-    if not args.model == 'SpectralSpacialMamba':
+    if not args.model == 'mvit':
         x_valid = x_valid.unsqueeze(1)
     print(x_valid.shape)
     y_valid = torch.from_numpy(y_valid).type(torch.LongTensor)
