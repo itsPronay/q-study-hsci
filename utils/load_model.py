@@ -1,12 +1,13 @@
-from model.mvit import MViT
-from model.spectralFormer import ViT
-from model.spectralSpacialMamba.model import mamba_1D_model, mamba_2D_model, mamba_SS_model
+from models.mvit import MViT
+from models.spectralFormer import ViT
+from models.hybridFormer import ViT
+from models.spectralSpacialMamba.model import mamba_1D_model, mamba_2D_model, mamba_SS_model
 import torch.nn as nn
 
 def model_loader(args, num_class):
     if args.model == 'mvit':
         model = MViT(num_classes = num_class).cuda()
-    elif args.model == 'SpectralFormer':
+    elif args.model == 'sf':
         model = ViT(
             img_size = args.patch_size,
             in_chans = args.pca_band,
@@ -18,7 +19,7 @@ def model_loader(args, num_class):
             dropout = 0.1,
             emb_dropout = 0.1,
         ).cuda()
-    elif args.model == 'SpectralSpacialMamba':
+    elif args.model == 'ssm':
         model = mamba_SS_model(
             spa_img_size=(args.windowsize, args.windowsize),
             spe_img_size=(args.spe_windowsize,args.spe_windowsize), 
@@ -35,6 +36,19 @@ def model_loader(args, num_class):
             global_pool=args.use_global, 
             cls = args.use_cls, 
             fu = args.use_fu
+        ).cuda()
+    elif args.model == 'hf':
+        model = ViT(
+            image_size=args.patch_size, 
+            patch_size=[3, 5], 
+            num_classes=num_class, 
+            dim=64, 
+            depth=4, 
+            heads=4, 
+            mlp_dim=512, 
+            channels=args.pca_band, 
+            dropout=0.2, 
+            emb_dropout=0.2
         ).cuda()
     else:
         raise Exception('model name could not found')

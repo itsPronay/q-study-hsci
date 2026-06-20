@@ -43,7 +43,7 @@ from quantizer.quantize_torchao import torchao_quantization
 
 parser = argparse.ArgumentParser(description='Quantization study')
 
-parser.add_argument('--model', type=str,choices=['SpectralFormer', 'SpectralSpacialMamba', 'mvit'], default='SpectralSpacialMamba')
+parser.add_argument('--model', type=str,choices=['sf', 'ssm', 'mvit', 'hf'], default='mvit')
 parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'Pavia', 'Indian', 'Houston'], default='UP')
 parser.add_argument('--quant_method', type=str, choices=['hqq', 'torchao'], default='hqq')
 parser.add_argument('--batch_size', type=int, default=512)
@@ -169,7 +169,7 @@ def main():
     print("*****************************************************************")
     print(f"x_train shape: {x_train.shape}, \nx_test shape: {x_test.shape} \n x_valid shape: {x_valid.shape}")
     print("*****************************************************************")
-    
+
     train_loader = Data.DataLoader(train_label, batch_size=args.batch_size, shuffle=True)
     test_loader = Data.DataLoader(test_label, batch_size=args.batch_size, shuffle=True)
     valid_loader = Data.DataLoader(valid_label, batch_size=args.batch_size, shuffle=True)
@@ -244,6 +244,7 @@ def main():
 
     results = {
         'model' : args.model,
+        'quantization_method': args.quant_method,
         'dataset': args.dataset,
         'OA': OA,
         'AA': AA_mean,
