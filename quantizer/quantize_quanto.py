@@ -38,6 +38,7 @@ def quanto_quantization(args, model):
     }
 
     print(f"Quantizing model with {args.nbits}-bit quantization using Quanto...")
+    print(f"Excluding layers from quantization: {exclude_layers}")
 
     weights_qtype = qtype_map[args.nbits]
 
