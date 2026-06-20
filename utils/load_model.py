@@ -10,7 +10,7 @@ def model_loader(args, num_class):
         model = ViT(
             image_size = args.patch_size,
             near_band = args.band_patch,
-            num_patches = args.band,
+            num_patches = args.pca_band,
             num_classes = num_class,
             dim = 64,
             depth = 5,
