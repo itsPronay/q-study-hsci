@@ -226,9 +226,9 @@ def main():
     elif args.quant_method == 'torchao':
         quantized_model = torchao_quantization(args, model)
 
-    # if args.print_quantization_summary:
-    #     print("\n[INFO]__________________________________ Model after quantization: __________________________________")
-    #     print_quantization_summary(model)
+    if args.print_quantization_summary:
+        print("\n[INFO]__________________________________ Model after quantization: __________________________________")
+        print_quantization_summary(quantized_model)
 
     #test quantized model
     test_tar_quantized, test_pre_quantized = test(quantized_model, test_loader)
