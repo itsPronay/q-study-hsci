@@ -10,9 +10,9 @@ from optimum.quanto import (
 def quanto_quantization(args, model):
 
     qtype_map = {
-        "3":  qint4,
-        "4":  qint8,
-        "f8": qfloat8,
+        "4":  qint4,
+        "8":  qint8,
+        # "8": qfloat8,
     }
 
     weights_qtype = qtype_map[args.nbits]
