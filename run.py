@@ -38,14 +38,14 @@ from utils.load_model import model_loader
 from utils.get_model_summary import print_quantization_summary
 
 from quantizer.quantize_hqq import hqq_quantization
-from quantizer.quantize_quanto import quanto_quantization
+from quantizer.quantize_torchao import torchao_quantization
 
 
 parser = argparse.ArgumentParser(description='Quantization study')
 
 parser.add_argument('--model', type=str,choices=['SpectralFormer', 'SpectralSpacialMamba', 'mvit'], default='SpectralSpacialMamba')
 parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'Pavia', 'Indian', 'Houston'], default='UP')
-parser.add_argument('--quant_method', type=str, choices=['hqq', 'quanto'], default='hqq')
+parser.add_argument('--quant_method', type=str, choices=['hqq', 'torchao'], default='hqq')
 parser.add_argument('--batch_size', type=int, default=512)
 parser.add_argument('--epoch', type=int, default=100)
 parser.add_argument('--learning_rate', type=float, default=1e-3)
@@ -217,8 +217,8 @@ def main():
     # quantize model
     if args.quant_method == 'hqq':
         quantized_model = hqq_quantization(args, model)
-    elif args.quant_method == 'quanto':
-        quantized_model = quanto_quantization(args, model)
+    elif args.quant_method == 'torchao':
+        quantized_model = torchao_quantization(args, model)
 
     # if args.print_quantization_summary:
     #     print("\n[INFO]__________________________________ Model after quantization: __________________________________")
