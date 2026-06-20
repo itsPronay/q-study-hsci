@@ -26,7 +26,7 @@ def hqq_quantization(args, model):
     elif args.model == 'SpectralSpacialMamba':
         exclude_layers = [
             "dt_proj",    # directly accesses .weight in forward_core line 248, so had to exclude
-            "linear",     # 299x299 = 89401, not divisible by any group size, excluded 
+            # "linear",     # 299x299 = 89401, not divisible by any group size, excluded 
             "head",       # classification head
         ]
     else:
