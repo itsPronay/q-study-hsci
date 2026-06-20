@@ -145,17 +145,23 @@ def main():
     y_train, y_test, y_valid = train_and_test_label(number_train, number_test, number_valid, num_classes)
 
     # load data
-    x_train = torch.from_numpy(x_train.transpose(0, 3, 1, 2)).unsqueeze(1).type(torch.FloatTensor)  # (90, 30, 15, 15)
+    x_train = torch.from_numpy(x_train.transpose(0, 3, 1, 2)).type(torch.FloatTensor)  
+    if not args.model == 'SpectralSpacialMamba':
+        x_train = x_train.unsqueeze(1)
     print(x_train.shape)
-    y_train = torch.from_numpy(y_train).type(torch.LongTensor)  # (13,)
+    y_train = torch.from_numpy(y_train).type(torch.LongTensor)  
     train_label = Data.TensorDataset(x_train, y_train)
 
-    x_test = torch.from_numpy(x_test.transpose(0, 3, 1, 2)).unsqueeze(1).type(torch.FloatTensor)  # (5198, 30, 15, 15)
+    x_test = torch.from_numpy(x_test.transpose(0, 3, 1, 2)).type(torch.FloatTensor) 
+    if not args.model == 'SpectralSpacialMamba':
+        x_test = x_test.unsqueeze(1)
     print(x_test.shape)
-    y_test = torch.from_numpy(y_test).type(torch.LongTensor)  # (5198,)
+    y_test = torch.from_numpy(y_test).type(torch.LongTensor)  
     test_label = Data.TensorDataset(x_test, y_test)
 
-    x_valid = torch.from_numpy(x_valid.transpose(0, 3, 1, 2)).unsqueeze(1).type(torch.FloatTensor)  # (5211, 30, 15, 15)
+    x_valid = torch.from_numpy(x_valid.transpose(0, 3, 1, 2)).type(torch.FloatTensor)
+    if not args.model == 'SpectralSpacialMamba':
+        x_valid = x_valid.unsqueeze(1)
     print(x_valid.shape)
     y_valid = torch.from_numpy(y_valid).type(torch.LongTensor)
     valid_label = Data.TensorDataset(x_valid, y_valid)

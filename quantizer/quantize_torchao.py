@@ -6,12 +6,10 @@ def torchao_quantization(args, model):
         exclude = ['cls_head']
         return isinstance(module, torch.nn.Linear) and fqn not in exclude
     
-    print(next(model.parameters()).dtype)
-
     if args.nbits == 4:
         config = Int4WeightOnlyConfig(group_size=args.group_size)
     elif args.nbits == 8:
         config = Int8WeightOnlyConfig(group_size=args.group_size)
 
-    quantize_(model, config, filter_fn=filter_fn)
+    model = quantize_(model, config, filter_fn=filter_fn)
     return model
