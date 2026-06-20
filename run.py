@@ -1,29 +1,18 @@
 import os
 import time
-import math
 import argparse
 import numpy as np
-import scipy.io as sio
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.patheffects as PathEffects
 import argparse
 
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 import torch
 import torch.nn as nn
 from torch import optim
 import torch.utils.data as Data
-import torch.nn.functional as F
 import wandb
-from einops import rearrange, repeat
-from timm.models.vision_transformer import Block
 from utils.data_prepare import mirror_hsi
 from utils.data_prepare import choose_train_and_test
-from utils.data_prepare import choose_all_pixels, all_data
 from utils.data_prepare import train_and_test_data, train_and_test_label
 from utils.train_utils import getClassOutputForEachClass
 from utils.data_prepare import applyPCA

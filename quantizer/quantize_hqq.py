@@ -18,16 +18,14 @@ def hqq_quantization(args, model):
     elif args.model == 'sf':
         exclude_layers = [
             "mlp_head",
-            "patch_to_embedding", # fails for group_size = 64
-            # "net.0",               # FFN layer 1 - too small for group_size=512
-            # "net.3",               # FFN layer 2 - too small for group_size=512
+            "patch_to_embedding", 
         ]
     elif args.model == 'ssm':
         exclude_layers = [
             "dt_proj",   
             "head",   
         ]
-    elif args.model == 'hf':
+    elif args.model == 'mf':
         exclude_layers = [
             "head"   
         ]
