@@ -166,6 +166,10 @@ def main():
     y_valid = torch.from_numpy(y_valid).type(torch.LongTensor)
     valid_label = Data.TensorDataset(x_valid, y_valid)
 
+    print("*****************************************************************")
+    print(f"x_train shape: {x_train.shape}, \nx_test shape: {x_test.shape} \n x_valid shape: {x_valid.shape}")
+    print("*****************************************************************")
+    
     train_loader = Data.DataLoader(train_label, batch_size=args.batch_size, shuffle=True)
     test_loader = Data.DataLoader(test_label, batch_size=args.batch_size, shuffle=True)
     valid_loader = Data.DataLoader(valid_label, batch_size=args.batch_size, shuffle=True)
