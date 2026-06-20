@@ -8,9 +8,8 @@ def model_loader(args, num_class):
         model = MViT(num_classes = num_class).cuda()
     elif args.model == 'SpectralFormer':
         model = ViT(
-            image_size = args.patch_size,
-            near_band = args.band_patch,
-            num_patches = args.pca_band,
+            img_size = args.patch_size,
+            in_chans = args.pca_band,
             num_classes = num_class,
             dim = 64,
             depth = 5,
@@ -18,7 +17,6 @@ def model_loader(args, num_class):
             mlp_dim = 8,
             dropout = 0.1,
             emb_dropout = 0.1,
-            mode = 'CAF'
         ).cuda()
     elif args.model == 'SpectralSpacialMamba':
         model = mamba_SS_model(
