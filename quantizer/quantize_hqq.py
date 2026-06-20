@@ -16,17 +16,21 @@ def hqq_quantization(args, model):
         exclude_layers = [
             "cls_head"
         ]
-    elif args.model == 'SpectralFormer':
+    elif args.model == 'sf':
         exclude_layers = [
             "mlp_head",
             "patch_to_embedding", # fails for group_size = 64
             # "net.0",               # FFN layer 1 - too small for group_size=512
             # "net.3",               # FFN layer 2 - too small for group_size=512
         ]
-    elif args.model == 'SpectralSpacialMamba':
+    elif args.model == 'ssm':
         exclude_layers = [
             "dt_proj",   
             "head",   
+        ]
+    elif args.model == 'hf':
+        exclude_layers = [
+            "head"   
         ]
     else:
         raise ValueError(f"Unsupported model {args.model} for quantization")
