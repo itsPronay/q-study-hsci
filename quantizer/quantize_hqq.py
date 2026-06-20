@@ -8,8 +8,7 @@ from utils.get_model_summary import getParamCount, print_quantization_summary, p
 def hqq_quantization(args, model):
     # check if model has been quantized
     if args.print_quantization_summary:
-        print("\n[INFO]__________________________________ Printing model summary - before quantization __________________________________")
-        getParamCount(model, printLayers=args.print_layers)
+        getParamCount(model, printLayers=True)
 
     if args.model == 'mvit':
         exclude_layers = [

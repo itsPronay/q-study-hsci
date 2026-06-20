@@ -109,7 +109,7 @@ def main():
     test_loader = Data.DataLoader(test_label, batch_size=args.batch_size, shuffle=False)
 
     print("started testing")
-    saved_path = './model/' + args.model + '.pt'
+    saved_path = './model/' + args.model + '_' + args.dataset + '.pt'
     model = model_loader(args, num_class=num_classes)
     model.load_state_dict(torch.load(saved_path))
     model.eval()

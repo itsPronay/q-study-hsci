@@ -134,7 +134,7 @@ def main():
     print('started training')
     acc_list = [0.00]
     os.makedirs('./model', exist_ok=True)
-    path = './model/' + args.model + '.pt'
+    path = './model/' + args.model + '_' + args.dataset + '.pt'
     tic = time.time()
 
     for epoch in range(args.epoch):
