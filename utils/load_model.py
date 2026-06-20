@@ -1,6 +1,6 @@
 from models.mvit import MViT
 from models.spectralFormer import ViT
-from models.hybridFormer import ViT
+from models.hybridFormer import Massformer
 from models.spectralSpacialMamba.model import mamba_1D_model, mamba_2D_model, mamba_SS_model
 import torch.nn as nn
 
@@ -38,18 +38,7 @@ def model_loader(args, num_class):
             fu = args.use_fu
         ).cuda()
     elif args.model == 'hf':
-        model = ViT(
-            image_size=args.patch_size, 
-            patch_size=[3, 5], 
-            num_classes=num_class, 
-            dim=64, 
-            depth=4, 
-            heads=4, 
-            mlp_dim=512, 
-            channels=args.pca_band, 
-            dropout=0.2, 
-            emb_dropout=0.2
-        ).cuda()
+        model = Massformer(num_classes=num_class).cuda()
     else:
         raise Exception('model name could not found')
     
