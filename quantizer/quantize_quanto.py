@@ -3,31 +3,50 @@ from optimum.quanto import (
     freeze,
     qint8,
     qint4,
+    qint2,
     qfloat8,
     quantize,
 )
 
 def quanto_quantization(args, model):
 
+    exclude_layers = []
+    if args.model == 'mvit':
+        exclude_layers = [
+            "cls_head"
+        ]
+    elif args.model == 'sf':
+        exclude_layers = [
+            "mlp_head",
+            "patch_to_embedding", 
+        ]
+    elif args.model == 'ssm':
+        exclude_layers = [
+            "head",   
+        ]
+    elif args.model == 'mf':
+        exclude_layers = [
+            "head"   
+        ]
+
     qtype_map = {
+        2: qint2,
         4:  qint4,
         8:  qint8,
-        # 8: qfloat8,
+        88: qfloat8, # pass 88 for float8
     }
 
-    weights_qtype = qtype_map[args.nbits]
+    print(f"Quantizing model with {args.nbits}-bit quantization using Quanto...")
 
-    # device = next(model.parameters()).device
+    weights_qtype = qtype_map[args.nbits]
 
     # quantize weights only (activations=None)
     quantize(
         model,
         weights=weights_qtype,
         activations=None,
-        exclude="mlp_head",
+        exclude=exclude_layers,
     )
     
-    # Step 2: freeze — replace float weights with QTensors
     freeze(model)
-
     return model
