@@ -21,21 +21,21 @@ def model_loader(args, num_class):
         ).cuda()
     elif args.model == 'ssm':
         model = mamba_SS_model(
-            spa_img_size=(args.windowsize, args.windowsize),
-            spe_img_size=(args.spe_windowsize,args.spe_windowsize), 
+            spa_img_size=(27, 27),
+            spe_img_size=(3,3), 
             spa_patch_size=args.patch_size, 
             spe_patch_size=args.band_patch, 
             in_chans=args.pca_band, 
-            hid_chans = args.hid_chans, 
-            embed_dim=args.embed_dim, 
-            drop_path=args.drop_rate, 
+            hid_chans = 64, 
+            embed_dim=64, 
+            drop_path=0.0, 
             nclass=num_class, 
-            depth=args.depth, 
-            bi=args.use_bi,
+            depth=4, 
+            bi=True,
             norm_layer=nn.LayerNorm, 
-            global_pool=args.use_global, 
-            cls = args.use_cls, 
-            fu = args.use_fu
+            global_pool=True, 
+            cls = True, 
+            fu = True
         ).cuda()
     elif args.model == 'mf':
         model = Massformer(num_classes=num_class).cuda()
