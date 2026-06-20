@@ -113,26 +113,29 @@ def main():
 
     test_loader = Data.DataLoader(test_label, batch_size=args.batch_size, shuffle=False)
 
-    print("started testing")
     saved_path = './model/' + args.model + '_' + args.dataset + '.pt'
     model = model_loader(args, num_class=num_classes)
     model.load_state_dict(torch.load(saved_path))
     model.eval()
 
     # test model before quantizing
+    print("started testing model before quantization")
     test_tar, test_pre = test(model, test_loader)
     OA, AA_mean, kappa, AA = output_metric(test_tar, test_pre)
 
     # quantize model
+    print("started quantization")
     if args.quant_method == 'hqq':
         quantized_model = hqq_quantization(args, model)
     elif args.quant_method == 'quanto':
         quantized_model = quanto_quantization(args, model)
+    print("Model has been quantized successfully")
 
-    if args.print_quantization_summary:
-        print("\n[INFO]__________________________________ Model after quantization: __________________________________")
-        print_quantization_summary(quantized_model)
+    # if args.print_quantization_summary:
+    #     print("\n[INFO]__________________________________ Model after quantization: __________________________________")
+    #     print_quantization_summary(quantized_model)
 
+    print("started testing model after quantization")
     test_tar_quantized, test_pre_quantized = test(quantized_model, test_loader)
     OA_quantized, AA_mean_quantized, kappa_quantized, AA_quantized = output_metric(test_tar_quantized, test_pre_quantized)
 
