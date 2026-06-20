@@ -24,7 +24,7 @@ def quanto_quantization(args, model):
         model,
         weights=weights_qtype,
         activations=None,
-        exclude="head",
+        exclude="mlp_head",
     )
     
     # Step 2: freeze — replace float weights with QTensors
