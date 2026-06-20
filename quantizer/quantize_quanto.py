@@ -1,4 +1,4 @@
-from quanto import (
+from optimum.quanto import (
     QTensor,
     freeze,
     qint8,
