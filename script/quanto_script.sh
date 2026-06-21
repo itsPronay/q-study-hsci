@@ -9,7 +9,12 @@
 
 set -euo pipefail
 
-MODELS=("sf" "ssm" "mvit" "mf")
+MODELS=(
+    # "sf" 
+    # "ssm" 
+    "mvit" 
+    "mf"
+    )
 DATASETS=("UP" "NF" "HC" "Pavia" "Indian" "Houston")
 
 NBITS=(2 4 8 88)   # 88 = float8

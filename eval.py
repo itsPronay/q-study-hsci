@@ -57,7 +57,7 @@ def main():
         )
 
     print("*****************************************************************")
-    print("Printing All Arguments while Training:")
+    print("Printing All Arguments:")
     print("*****************************************************************")
     for arg in vars(args):
         if arg == 'train_num' and getattr(args, arg) == 20 and args.dataset == 'Indian':
