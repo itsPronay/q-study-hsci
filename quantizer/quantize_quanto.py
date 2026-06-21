@@ -27,7 +27,7 @@ def quanto_quantization(args, model):
     elif args.model == 'mf':
         exclude_layers = [
             "head",
-            "conv2d" # it is only here for testing, confirm with edwin then remove if not needed
+            # "conv2d" # it is only here for testing, confirm with edwin then remove if not needed
         ]
 
     qtype_map = {
@@ -41,6 +41,8 @@ def quanto_quantization(args, model):
     print(f"Excluding layers from quantization: {exclude_layers}")
 
     weights_qtype = qtype_map[args.nbits]
+    
+    model = model.cpu()
 
     # quantize weights only (activations=None)
     quantize(

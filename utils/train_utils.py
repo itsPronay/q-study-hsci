@@ -109,12 +109,15 @@ def train(model, train_loader, criterion, optimizer):
 
 def test(model, test_loader):
     model.eval()
+    device = next(model.parameters()).device  # follows model — cpu or cuda automatically
     tar = np.array([])
     pre = np.array([])
     with torch.no_grad():
         for batch_idx, (batch_data, batch_target) in enumerate(test_loader):
-            batch_data = batch_data.cuda()
-            batch_target = batch_target.cuda()
+            # batch_data = batch_data.cuda()
+            # batch_target = batch_target.cuda()
+            batch_data = batch_data.to(device)
+            batch_target = batch_target.to(device)
             
             batch_pred = model(batch_data)  # (batch, 13)
             _, pred = batch_pred.topk(1, axis=1)  # (100, 1)
