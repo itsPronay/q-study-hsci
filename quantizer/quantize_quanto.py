@@ -1,5 +1,4 @@
 from optimum.quanto import (
-    QTensor,
     freeze,
     qint8,
     qint4,
@@ -27,7 +26,6 @@ def quanto_quantization(args, model):
     elif args.model == 'mf':
         exclude_layers = [
             "head",
-            # "conv2d" # it is only here for testing, confirm with edwin then remove if not needed
         ]
 
     qtype_map = {
@@ -42,7 +40,8 @@ def quanto_quantization(args, model):
 
     weights_qtype = qtype_map[args.nbits]
     
-    model = model.cpu()
+    if args.model != "ssm":
+        model = model.cpu()
 
     # quantize weights only (activations=None)
     quantize(
