@@ -10,9 +10,9 @@ from sklearn.metrics import confusion_matrix
 
 def getClassOutputForEachClass(accuracies, is_quantized=False):
     if is_quantized:
-        prefix = f"(quant_acc"
+        prefix = "quant_acc"
     else:
-        prefix = f"acc"
+        prefix = "acc"
     print(accuracies)
     return {f"{prefix}_cls_{i+1}": accuracies[i] for i in range(len(accuracies))}
 
