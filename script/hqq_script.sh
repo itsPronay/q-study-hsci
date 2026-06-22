@@ -11,31 +11,31 @@ set -euo pipefail
   # Finished all bit/group combos for model=mvit dataset=HC , mf all baki
 #
 MODELS=(
-    # "sf" 
+    "sf" 
     # "ssm" 
     # "mvit" 
-    "mf"
+    # "mf"
     )
 DATASETS=(
-    "UP" 
-    "NF" 
-    "HC" 
+    # "UP" 
+    # "NF" 
+    # "HC" 
     "Pavia"  #sf pavia left, run later
-    "Indian" 
-    "Houston"
+    # "Indian" 
+    # "Houston"
     )
 
 NBITS=(
-    1 
-    2 
-    3 
+    # 1 
+    # 2 
+    # 3 
     4 
-    8
+    # 8
     )
 GROUP_SIZES=(
-    8 
-    16 
-    32 
+    # 8 
+    # 16 
+    # 32 
     64
     )
 
