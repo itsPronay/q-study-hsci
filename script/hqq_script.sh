@@ -13,13 +13,13 @@ set -euo pipefail
 MODELS=(
     # "sf" 
     # "ssm" 
-    "mvit" 
-    # "mf"
+    # "mvit" 
+    "mf"
     )
 DATASETS=(
-    # "UP" 
-    # "NF" 
-    # "HC" 
+    "UP" 
+    "NF" 
+    "HC" 
     "Pavia"  #sf pavia left, run later
     "Indian" 
     "Houston"
