@@ -9,9 +9,9 @@
 set -euo pipefail
 
 MODELS=(
-    "sf" 
+    # "sf" 
     # "ssm" 
-    # "mvit" 
+    "mvit" 
     # "mf"
     )
 DATASETS=(
@@ -19,8 +19,8 @@ DATASETS=(
     # "NF" 
     # "HC" 
     "Pavia"  #sf pavia left, run later
-    # "Indian" 
-    # "Houston"
+    "Indian" 
+    "Houston"
     )
 
 NBITS=(
