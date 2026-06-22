@@ -29,13 +29,13 @@ def get_args():
     parser.add_argument('--quant_method', type=str, choices=['hqq', 'quanto'], default='hqq')
     parser.add_argument('--nbits', type=int, default=8)
     parser.add_argument('--print_quantization_summary', type=int, default=1) # 0 for false, 1 for true
-    parser.add_argument('--group_size', type=lambda x: None if x.lower() == 'none' else int(x), default=64)
+    parser.add_argument('--group_size', type=lambda x: None if x.lower() == 'none' else int(x), default=-1)
     parser.add_argument('--del_orig', type=lambda x: x.lower() == 'true', default=True, help='if True, delete the original Linear weight inside HQQLinear')
     parser.add_argument('--verbose', type=lambda x: x.lower() == 'true', default=True, help='if True, print replacement information')
 
-    # wandb args
+    # wandb 
     parser.add_argument("--wandb_mode", default="online", choices=["online", "offline", "disabled"])
-    parser.add_argument('--wandb_project', type=str, default='QHSIC_study_corresct', help='wandb project name')
+    parser.add_argument('--wandb_project', type=str, default='QHSIC_final_benchmark', help='wandb project name')
 
     args = parser.parse_args()
     return args
@@ -153,14 +153,15 @@ def main():
         model_name = 'MassFormer'
 
     results = {
+        'model_name_full' : model_name,
         'OA': OA * 100,
         'AA': AA_mean * 100,
         'Kappa': kappa * 100,
         'OA_quantized': OA_quantized * 100,
         'AA_quantized': AA_mean_quantized * 100,
         'Kappa_quantized': kappa_quantized * 100,
-        **getClassOutputForEachClass(f"{args.dataset}_{args.model}_{args.quant_method}_nbits{args.nbits}_group{args.group_size}", class_acc),
-        **getClassOutputForEachClass(f"{args.dataset}_{args.model}_{args.quant_method}_nbits{args.nbits}_group{args.group_size}", clas_acc_quantized, is_quantized=True),
+        **getClassOutputForEachClass("", class_acc),
+        **getClassOutputForEachClass("", clas_acc_quantized, is_quantized=True),
     }
 
     print("*****************************************************************")
