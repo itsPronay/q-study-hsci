@@ -11,8 +11,8 @@ set -euo pipefail
 MODELS=(
     "sf" 
     "ssm" 
-    "mvit" 
-    "mf"
+    # "mvit" 
+    # "mf"
     )
 DATASETS=(
     "UP" 
