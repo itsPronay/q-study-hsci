@@ -9,25 +9,25 @@
 set -euo pipefail
 
 MODELS=(
-    # "sf" 
-    "ssm" 
+    "sf" 
+    # "ssm" 
     # "mvit" 
     # "mf"
     )
 DATASETS=(
-    "UP" 
-    "NF" 
-    "HC" 
+    # "UP" 
+    # "NF" 
+    # "HC" 
     "Pavia"  #sf pavia left, run later
-    "Indian" 
-    "Houston"
+    # "Indian" 
+    # "Houston"
     )
 
 NBITS=(
-    1 
-    2 
-    3 
-    4 
+    # 1 
+    # 2 
+    # 3 
+    # 4 
     8
     )
 GROUP_SIZES=(
