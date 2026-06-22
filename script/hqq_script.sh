@@ -18,9 +18,9 @@ DATASETS=(
     # "UP" 
     # "NF" 
     # "HC" 
-    # "Pavia" 
-    "Indian" 
-    "Houston"
+    "Pavia"  #sf pavia left, run later
+    # "Indian" 
+    # "Houston"
     )
 
 NBITS=(
