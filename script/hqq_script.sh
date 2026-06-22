@@ -8,10 +8,12 @@
 
 set -euo pipefail
 
+  # Finished all bit/group combos for model=mvit dataset=HC , mf all baki
+#
 MODELS=(
-    "sf" 
+    # "sf" 
     # "ssm" 
-    # "mvit" 
+    "mvit" 
     # "mf"
     )
 DATASETS=(
@@ -19,8 +21,8 @@ DATASETS=(
     # "NF" 
     # "HC" 
     "Pavia"  #sf pavia left, run later
-    # "Indian" 
-    # "Houston"
+    "Indian" 
+    "Houston"
     )
 
 NBITS=(
