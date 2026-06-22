@@ -18,7 +18,7 @@ DATASETS=(
     # "UP" 
     # "NF" 
     # "HC" 
-    "Pavia" 
+    # "Pavia" 
     "Indian" 
     "Houston"
     )
