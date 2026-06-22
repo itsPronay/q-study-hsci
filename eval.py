@@ -35,7 +35,7 @@ def get_args():
 
     # wandb args
     parser.add_argument("--wandb_mode", default="online", choices=["online", "offline", "disabled"])
-    parser.add_argument('--wandb_project', type=str, default='QHSIC_study_correct', help='wandb project name')
+    parser.add_argument('--wandb_project', type=str, default='QHSIC_study_corresct', help='wandb project name')
 
     args = parser.parse_args()
     return args
@@ -51,7 +51,7 @@ def main():
     if args.wandb_mode != 'disabled':
         wandb.init(
             project = args.wandb_project,
-            name = f"{args.model}_{args.dataset}_{args.quant_method}_nbits:{args.nbits}_group:{args.group_size}",
+            name = f"{args.model}_{args.dataset}_{args.quant_method}_nbits{args.nbits}_group{args.group_size}",
             mode = args.wandb_mode,
             config = vars(args)
         )
@@ -153,17 +153,14 @@ def main():
         model_name = 'MassFormer'
 
     results = {
-        'model' : model_name,
-        'quantization_method': args.quant_method,
-        'dataset': args.dataset,
         'OA': OA * 100,
         'AA': AA_mean * 100,
         'Kappa': kappa * 100,
         'OA_quantized': OA_quantized * 100,
         'AA_quantized': AA_mean_quantized * 100,
         'Kappa_quantized': kappa_quantized * 100,
-        **getClassOutputForEachClass(args.dataset + '_' + args.model, class_acc),
-        **getClassOutputForEachClass(args.dataset + '_' + args.model, clas_acc_quantized, is_quantized=True),
+        **getClassOutputForEachClass(f"{args.dataset}_{args.model}_{args.quant_method}_nbits{args.nbits}_group{args.group_size}", class_acc),
+        **getClassOutputForEachClass(f"{args.dataset}_{args.model}_{args.quant_method}_nbits{args.nbits}_group{args.group_size}", clas_acc_quantized, is_quantized=True),
     }
 
     print("*****************************************************************")

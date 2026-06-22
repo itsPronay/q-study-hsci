@@ -12,10 +12,10 @@ MODELS=(
     # "sf" 
     # "ssm" 
     "mvit" 
-    # "mf"
+    "mf"
     )
 DATASETS=(
-    # "UP" 
+    "UP" 
     # "NF" 
     # "HC" 
     "Pavia" 
