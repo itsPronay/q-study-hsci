@@ -8,11 +8,34 @@
 
 set -euo pipefail
 
-MODELS=("sf" "ssm" "mvit" "mf")
-DATASETS=("UP" "NF" "HC" "Pavia" "Indian" "Houston")
+MODELS=(
+    # "sf" 
+    # "ssm" 
+    "mvit" 
+    # "mf"
+    )
+DATASETS=(
+    # "UP" 
+    # "NF" 
+    # "HC" 
+    "Pavia" 
+    # "Indian" 
+    # "Houston"
+    )
 
-NBITS=(1 2 3 4 8)
-GROUP_SIZES=(8 16 32 64)
+NBITS=(
+    1 
+    2 
+    3 
+    4 
+    8
+    )
+GROUP_SIZES=(
+    8 
+    16 
+    32 
+    64
+    )
 
 QUANT_METHOD="hqq"
 WANDB_MODE="online"        # change to "disabled" to turn off W&B

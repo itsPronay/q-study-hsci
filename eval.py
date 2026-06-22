@@ -35,7 +35,7 @@ def get_args():
 
     # wandb args
     parser.add_argument("--wandb_mode", default="online", choices=["online", "offline", "disabled"])
-    parser.add_argument('--wandb_project', type=str, default='QHSIC_study', help='wandb project name')
+    parser.add_argument('--wandb_project', type=str, default='QHSIC_study_correct', help='wandb project name')
 
     args = parser.parse_args()
     return args
@@ -51,7 +51,7 @@ def main():
     if args.wandb_mode != 'disabled':
         wandb.init(
             project = args.wandb_project,
-            name = f"{args.model}_{args.dataset}_quantization_{args.nbits}bits_group{args.group_size}",
+            name = f"{args.model}_{args.dataset}_{args.quant_method}_nbits:{args.nbits}_group:{args.group_size}",
             mode = args.wandb_mode,
             config = vars(args)
         )
