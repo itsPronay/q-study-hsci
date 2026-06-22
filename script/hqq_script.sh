@@ -10,7 +10,7 @@ set -euo pipefail
 
 MODELS=(
     "sf" 
-    "ssm" 
+    # "ssm" 
     # "mvit" 
     # "mf"
     )
