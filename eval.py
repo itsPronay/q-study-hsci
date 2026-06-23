@@ -125,6 +125,7 @@ def main():
 
     # latency and throughput before quantization
     device = next(model.parameters()).device  # follows model — cpu or cuda automatically #gpu
+    print(f"Device used for latency and throughput measurement: {device}")
     latency_results = measure_latency_throughput(model, test_loader, device)
 
     # quantize model
@@ -145,6 +146,7 @@ def main():
 
     # latency and tps after quantization
     device = next(quantized_model.parameters()).device  # follows model — cpu or cuda automatically
+    print(f"Device used for latency and throughput measurement: {device}")
     quant_latency_results = measure_latency_throughput(quantized_model, test_loader, device, is_quantized=True)
 
     # get per class accuracy for both original and quantized model
