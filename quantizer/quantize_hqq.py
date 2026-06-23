@@ -2,11 +2,11 @@ import torch
 from hqq.core.quantize import BaseQuantizeConfig
 import quantizer.hqq_wrapper as hqq_wrapper
 import numpy as np
-from utils.get_model_summary import getParamCount, print_quantization_summary, printWeightStatistics
+from utils.get_model_summary import getParamCount
 
 
 def hqq_quantization(args, model):
-    
+
     if args.model == 'mvit':
         exclude_layers = [
             "cls_head"
