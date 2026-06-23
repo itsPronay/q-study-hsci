@@ -6,10 +6,7 @@ from utils.get_model_summary import getParamCount, print_quantization_summary, p
 
 
 def hqq_quantization(args, model):
-    # check if model has been quantized
-    if args.print_quantization_summary:
-        getParamCount(model, printLayers=True)
-
+    
     if args.model == 'mvit':
         exclude_layers = [
             "cls_head"

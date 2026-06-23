@@ -10,12 +10,12 @@ import wandb
 from utils.data_prepare import mirror_hsi
 from utils.data_prepare import choose_train_and_test
 from utils.data_prepare import train_and_test_data, train_and_test_label
+from utils.get_model_summary import measure_latency_throughput
 from utils.train_utils import getClassOutputForEachClass
 from utils.data_prepare import applyPCA
 from utils.train_utils import train, test, valid, output_metric, class_accuracy_percent
 from utils.download_dataset import downloadAndLoadDataset
 from utils.load_model import model_loader
-from utils.get_model_summary import print_quantization_summary
 
 from quantizer.quantize_hqq import hqq_quantization
 from quantizer.quantize_quanto import quanto_quantization
@@ -123,6 +123,10 @@ def main():
     test_tar, test_pre = test(model, test_loader)
     OA, AA_mean, kappa, AA = output_metric(test_tar, test_pre)
 
+    # latency and throughput before quantization
+    device = next(model.parameters()).device  # follows model — cpu or cuda automatically #gpu
+    latency_results = measure_latency_throughput(model, test_loader, device)
+
     # quantize model
     print("started quantization")
     if args.quant_method == 'hqq':
@@ -138,6 +142,10 @@ def main():
     print("started testing model after quantization")
     test_tar_quantized, test_pre_quantized = test(quantized_model, test_loader)
     OA_quantized, AA_mean_quantized, kappa_quantized, AA_quantized = output_metric(test_tar_quantized, test_pre_quantized)
+
+    # latency and tps after quantization
+    device = next(quantized_model.parameters()).device  # follows model — cpu or cuda automatically
+    quant_latency_results = measure_latency_throughput(quantized_model, test_loader, device, is_quantized=True)
 
     # get per class accuracy for both original and quantized model
     class_acc = class_accuracy_percent(test_tar, test_pre, num_classes)
@@ -162,6 +170,8 @@ def main():
         'Kappa_quantized': kappa_quantized * 100,
         **getClassOutputForEachClass( class_acc),
         **getClassOutputForEachClass(clas_acc_quantized, is_quantized=True),
+        **latency_results,
+        **quant_latency_results,
     }
 
     print("*****************************************************************")

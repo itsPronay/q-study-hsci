@@ -4,6 +4,52 @@ import numpy as np
 import torch
 from hqq.core.quantize import HQQLinear
 import torch.nn as nn
+import numpy as np
+import time
+import torch
+
+
+def measure_latency_throughput(model, test_loader, device, is_quantized=False):
+    """
+    Runs inference over the entire test_loader.
+    Latency = total_time / total_samples  * 1000 (milliseconds per sample)
+    Throughput = total_samples / total_time  (samples per second)
+    """
+    model.eval()
+    model = model.to(device)
+
+    total_samples = 0
+
+    if device.type == 'cuda':
+        torch.cuda.synchronize()
+
+    start = time.perf_counter()
+
+    with torch.no_grad():
+        for inputs, _ in test_loader:
+            inputs = inputs.to(device)
+            model(inputs)
+            total_samples += inputs.size(0)
+
+    if device.type == 'cuda':
+        torch.cuda.synchronize()
+
+    total_time_sec = time.perf_counter() - start
+
+    latency_ms         = (total_time_sec / total_samples) * 1000   # ms per sample
+    throughput         = total_samples / total_time_sec              # samples / sec
+
+    print (f"Total samples: {total_samples}, Total time: {total_time_sec:.4f} sec, Latency: {latency_ms:.4f} ms/sample, Throughput: {throughput:.2f} samples/sec")
+    
+    if is_quantized:
+        prefix = "quant_"
+    else:
+        prefix = ""
+
+    return {
+        f'{prefix}_latency_ms':       round(latency_ms, 2),
+        f'{prefix}_throughput_samples_per_sec': round(throughput, 2),
+    }
 
 
 def getParamCount(model, printLayers=False):
@@ -19,43 +65,5 @@ def getParamCount(model, printLayers=False):
             total_param += num_param
     
     print("\nTotal Trainable Parameters:", total_param)
-    if printLayers:
-        printAllLinearLayers(model)
     return total_param
 
-def printAllLinearLayers(model):
-    print("\n[INFO] __________________________________________Printing all Linear Layers:__________________________________________")
-    total_linear_layers = 0
-    for name, module in model.named_modules():
-        if isinstance(module, nn.Linear):
-            print(name, module.weight.shape)
-            total_linear_layers += 1
-    print(f"\nTotal Linear layers: {total_linear_layers}")
-    print("__________________________________________________________________________________________________________________________")
-
-
-def printWeightStatistics(model):
-    print("\n[INFO] __________________________________________Model Weight Statistics:__________________________________________")
-    for name, param in model.named_parameters():
-        if param.requires_grad:
-            print(f"{name}: mean={param.data.mean():.4f}, std={param.data.std():.4f}, min={param.data.min():.4f}, max={param.data.max():.4f}")
-
-
-def print_quantization_summary(model):
-    total_layers = 0
-    quantized_layers = 0
-    
-    for name, module in model.named_modules():
-        if isinstance(module, HQQLinear):
-            nbits = module.quant_config['weight_quant_params']['nbits']
-            group_size = module.quant_config['weight_quant_params']['group_size']
-            shape = module.W_q.shape
-            print(f"{name}: {nbits}-bit | group_size={group_size} | W_q shape={shape}")
-            quantized_layers += 1
-        elif isinstance(module, torch.nn.Linear):
-            print(f"{name}: NOT quantized (fp32) | shape={module.weight.shape}")
-        total_layers += 1
-    
-    print(f"\nQuantized: {quantized_layers} layers, Total: {total_layers} layers, Quantization Ratio: {quantized_layers/total_layers:.2%}")
-
-    # print_quantization_summary(model)
