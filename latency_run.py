@@ -59,7 +59,7 @@ def main():
             wandb.init(
                 project="Study latency and throughput of quantized models",
                 name=f"{m}_{b}bits",
-                mode=args.wandb_mode,
+                mode="online",
                 config=vars(args)
             )
             print(f"Running latency test for model: {m} | bits: {b}")
