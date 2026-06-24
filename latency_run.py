@@ -48,6 +48,7 @@ def benchmark_model(model, input_tensor, runs=50, warmup_runs=30):
         'throughput_samples_per_sec': round(throughput, 4),
     }
 
+def main():
 
 models     = ["sf", "ssm", "mvit", "mf"]
 quant_bits = [1, 2, 4, 8]
@@ -86,3 +87,6 @@ for m in models:
         wandb.log({f"fp32_{k}": v for k, v in metrics.items()})
         wandb.log({f"quant_{k}": v for k, v in quant_metrics.items()})
         wandb.finish()
+
+if __name__ == "__main__":
+    main()
