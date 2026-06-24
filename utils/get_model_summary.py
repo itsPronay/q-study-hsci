@@ -9,7 +9,7 @@ import time
 import torch
 
 
-def measure_latency_throughput(model, test_loader, device, is_quantized=False):
+def measure_latency_throughput(model, test_loader, device, is_quantized=False, warmup=10):
     """
     Runs inference over the entire test_loader.
     Latency = total_time / total_samples  * 1000 (milliseconds per sample)
@@ -19,6 +19,14 @@ def measure_latency_throughput(model, test_loader, device, is_quantized=False):
     model = model.to(device)
 
     total_samples = 0
+
+     # warmup
+    with torch.no_grad():
+        for i, (x, _) in enumerate(test_loader):
+            if i >= warmup:
+                break
+            x = x.to(device)
+            model(x)
 
     if device.type == 'cuda':
         torch.cuda.synchronize()
