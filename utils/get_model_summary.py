@@ -85,3 +85,4 @@ def getParamCount(model, printLayers=False):
 
     print("\nTotal Trainable Parameters:", total_param)
     return total_param
+
