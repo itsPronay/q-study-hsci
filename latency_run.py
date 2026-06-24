@@ -50,43 +50,43 @@ def benchmark_model(model, input_tensor, runs=50, warmup_runs=30):
 
 def main():
 
-models     = ["sf", "ssm", "mvit", "mf"]
-quant_bits = [1, 2, 4, 8]
-device     = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    models     = ["sf", "ssm", "mvit", "mf"]
+    quant_bits = [1, 2, 4, 8]
+    device     = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-for m in models:
-    for b in quant_bits:
-        wandb.init(
-            project="Study latency and throughput of quantized models",
-            name=f"{m}_{b}bits",
-            mode=args.wandb_mode,
-            config=vars(args)
-        )
-        print(f"Running latency test for model: {m} | bits: {b}")
+    for m in models:
+        for b in quant_bits:
+            wandb.init(
+                project="Study latency and throughput of quantized models",
+                name=f"{m}_{b}bits",
+                mode=args.wandb_mode,
+                config=vars(args)
+            )
+            print(f"Running latency test for model: {m} | bits: {b}")
 
-        args.model = m
-        args.nbits = b
+            args.model = m
+            args.nbits = b
 
-        model = model_loader(args, num_class=10).to(device)
-        model.eval()
+            model = model_loader(args, num_class=10).to(device)
+            model.eval()
 
-        if m in ['mvit', 'mf']:
-            input_tensor = torch.randn(1, 1, args.pca_band, args.patch_size, args.patch_size).to(device)
-        else:
-            input_tensor = torch.randn(1, args.pca_band, args.patch_size, args.patch_size).to(device)
+            if m in ['mvit', 'mf']:
+                input_tensor = torch.randn(1, 1, args.pca_band, args.patch_size, args.patch_size).to(device)
+            else:
+                input_tensor = torch.randn(1, args.pca_band, args.patch_size, args.patch_size).to(device)
 
-        metrics = benchmark_model(model, input_tensor)
-        print(f"Results — model: {m} | bits: {b} | {metrics}")
+            metrics = benchmark_model(model, input_tensor)
+            print(f"Results — model: {m} | bits: {b} | {metrics}")
 
-        quantized_model = hqq_quantization(args, model).to(device)
-        quantized_model.eval()
+            quantized_model = hqq_quantization(args, model).to(device)
+            quantized_model.eval()
 
-        quant_metrics = benchmark_model(quantized_model, input_tensor)
-        print(f"Results after quantization — model: {m} | bits: {b} | {quant_metrics}")
+            quant_metrics = benchmark_model(quantized_model, input_tensor)
+            print(f"Results after quantization — model: {m} | bits: {b} | {quant_metrics}")
 
-        wandb.log({f"fp32_{k}": v for k, v in metrics.items()})
-        wandb.log({f"quant_{k}": v for k, v in quant_metrics.items()})
-        wandb.finish()
+            wandb.log({f"fp32_{k}": v for k, v in metrics.items()})
+            wandb.log({f"quant_{k}": v for k, v in quant_metrics.items()})
+            wandb.finish()
 
 if __name__ == "__main__":
     main()
