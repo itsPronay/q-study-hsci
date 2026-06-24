@@ -4,12 +4,12 @@ import torch
 import time
 import numpy as np
 from utils.load_model import model_loader
-from train import get_base_args
+from eval import get_args
 from quantizer.quantize_hqq import hqq_quantization
 
 
-parser = get_base_args()
-args = parser.parse_args()
+args = get_args()
+# args = parser.parse_args()
 
 def benchmark_model(model, input_tensor, runs=50, warmup_runs=30):
 
