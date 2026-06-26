@@ -109,7 +109,6 @@ def main():
     valid_loader = Data.DataLoader(valid_label, batch_size=args.batch_size, shuffle=True)
 
     model = model_loader(args, num_class=num_classes)
-    print(model)
     print("Model loaded successfully")
 
     criterion = nn.CrossEntropyLoss()
