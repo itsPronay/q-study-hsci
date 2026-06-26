@@ -40,6 +40,8 @@ parser.add_argument('--batch_size', type=int, default=64)
 parser.add_argument('--patch_size', type=int, default=15)
 parser.add_argument('--band_patch', type=int, default=1)
 parser.add_argument('--pca_band', type=int, default=30)
+parser.add_argument('--train_num', type=int, default=20)
+parser.add_argument('--seed', type=int, default=42)
 
 parser.add_argument('--del_orig', type=lambda x: x.lower() == 'true', default=True, help='if True, delete the original Linear weight inside HQQLinear')
 parser.add_argument('--verbose', type=lambda x: x.lower() == 'true', default=True, help='if True, print replacement information')
@@ -135,7 +137,6 @@ def measure_latency_throughput(model, test_loader, is_quantized=False, warmup=10
         f'{prefix}latency_std_ms':             round(latency_std, 2),
         f'{prefix}throughput_samples_per_sec': round(throughput, 2),
     }
-
 
 
 def log_latency_throughput_to_wandb():
