@@ -2,8 +2,6 @@ import torch
 from hqq.core.quantize import BaseQuantizeConfig
 import quantizer.hqq_wrapper as hqq_wrapper
 import numpy as np
-from get_model_summary import getParamCount
-
 
 def hqq_quantization(args, model):
 
