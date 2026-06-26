@@ -34,6 +34,7 @@ parser.add_argument('--nbits', type=str)
 parser.add_argument('--warmup', type=int, default=2)
 parser.add_argument('--runs', type=int, default=5)
 parser.add_argument('--quant_method', type=str)
+parser.add_argument('--dataset', type=str, choices=['UP', 'NF', 'HC', 'Pavia', 'Indian', 'Houston'], default='UP')
 
 parser.add_argument('--batch_size', type=int, default=64)
 parser.add_argument('--patch_size', type=int, default=15)
@@ -140,7 +141,7 @@ def measure_latency_throughput(model, test_loader, is_quantized=False, warmup=10
 def log_latency_throughput_to_wandb():
     print(args)
     # Load data
-    data, label = downloadAndLoadDataset("Pavia")
+    data, label = downloadAndLoadDataset(args.dataset)
     num_classes = int(np.max(label))
 
     # apply normalization
