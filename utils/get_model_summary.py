@@ -7,16 +7,186 @@ import torch.nn as nn
 import numpy as np
 import time
 import torch
+import numpy as np
 
+from sklearn.preprocessing import StandardScaler
 
-def measure_latency_throughput(model, test_loader, device, is_quantized=False, warmup=10, runs=10):
+import torch
+import torch.nn as nn
+from torch import optim
+import torch.utils.data as Data
+import wandb
+from utils.data_prepare import mirror_hsi
+from utils.data_prepare import choose_train_and_test
+from utils.data_prepare import train_and_test_data, train_and_test_label
+from utils.data_prepare import applyPCA
+from utils.download_dataset import downloadAndLoadDataset
+from utils.load_model import model_loader
+from models.mvit import MViT
+from models.spectralFormer import ViT
+from models.massFormer import Massformer
+from models.spectralSpacialMamba.model import mamba_1D_model, mamba_2D_model, mamba_SS_model
+import torch.nn as nn
+from quantizer.quantize_hqq import hqq_quantization
+from quantizer.quantize_quanto import quanto_quantization
+
+from utils.load_model import model_loader
+from train import get_base_args
+from eval import get_args
+import argparse
+
+parser = argparse.ArgumentParser('Latency and Throughput Measurement')
+
+parser.add_argument('--model', type=str)
+parser.add_argument('--group_size', type=lambda x: None if x.lower() == 'none' else int(x))
+parser.add_argument('--nbits', type=str)
+parser.add_argument('--warmup', type=int, default=3)
+parser.add_argument('--runs', type=int, default=5)
+parser.add_argument('--quant_method', type=str)
+
+parser.add_argument('--batch_size', type=int, default=64)
+parser.add_argument('--patch_size', type=int, default=15)
+parser.add_argument('--band_patch', type=int, default=1)
+parser.add_argument('--pca_band', type=int, default=30)
+
+parser.add_argument('--del_orig', type=lambda x: x.lower() == 'true', default=True, help='if True, delete the original Linear weight inside HQQLinear')
+parser.add_argument('--verbose', type=lambda x: x.lower() == 'true', default=True, help='if True, print replacement information')
+
+parser.add_argument("--wandb_mode", default="online", choices=["online", "offline", "disabled"])
+parser.add_argument('--wandb_project', type=str, default='QHSICdyf', help='wandb project name')
+
+args = parser.parse_args()
+
+models = ['sf', 'ssm', 'mvit', 'mf']
+hqq_nbits = [1, 2, 3, 4, 8]
+quanto_nbits = [2, 4, 8, 88]
+group_sizes = [8, 16, 32, 64]
+
+def setupWandb(args):
+    if args.model == 'mvit':
+        model_name = 'MViT'
+    elif args.model == 'ssm':
+        model_name = 'SpectralSpacialMamba'
+    elif args.model == 'sf':
+        model_name = 'SpectralFormer'
+    elif args.model == 'mf':
+        model_name = 'MassFormer'
+    if args.nbits is not None:
+        run_name = f"{model_name}_{args.quant_method}_nbits{args.nbits}_group{args.group_size}"
+    else:
+        run_name = f"{model_name}_BASE"
+
+    if args.wandb_mode != 'disabled':
+        wandb.init(
+            project = args.wandb_project,
+            name = run_name,
+            mode = args.wandb_mode,
+            config = vars(args)
+        )
+
+def log_latency_throughput_to_wandb():
+    # Load data
+    data, label = downloadAndLoadDataset(args.dataset)
+    num_classes = int(np.max(label))
+
+    # apply normalization
+    shapeor = data.shape
+    data = data.reshape(np.prod(data.shape[:2]), np.prod(data.shape[2:]))
+
+    std_scaler = StandardScaler()
+    std_data = std_scaler.fit_transform(data)
+    data = std_data.reshape(shapeor)
+
+    data, pca = applyPCA(data, numComponents=args.pca_band)
+
+    # data size
+    height, width, band = data.shape
+    print("height={0}, width={1}, band={2}".format(height, width, band))
+
+    mirror_data = mirror_hsi(height, width, band, data, patch_size=args.patch_size)
+
+    if args.dataset == 'Indian': #hardcoding cause, a class in indian Pines has only 
+        train_num = 10
+    else:
+        train_num= args.train_num
+    total_pos_train, total_pos_test, total_pos_valid, number_train, number_test, number_valid = choose_train_and_test(
+        label, num_train_per_class=train_num, seed=args.seed
+    )
+
+    _, x_test, _ = train_and_test_data(
+        mirror_data, band, total_pos_train, total_pos_test, total_pos_valid, patch_size=args.patch_size
+    )
+    _, y_test, _ = train_and_test_label(number_train, number_test, number_valid, num_classes)
+
+    x_test = torch.from_numpy(x_test.transpose(0, 3, 1, 2)).type(torch.FloatTensor) 
+    if args.model == 'mvit' or args.model == 'mf':
+        x_test = x_test.unsqueeze(1)
+    print(x_test.shape)
+    y_test = torch.from_numpy(y_test).type(torch.LongTensor)  
+    test_label = Data.TensorDataset(x_test, y_test)
+
+    print("*****************************************************************")
+    print(f"x_test shape: {x_test.shape}")
+    print("*****************************************************************")
+
+    test_loader = Data.DataLoader(test_label, batch_size=args.batch_size, shuffle=False)
+
+    for m in models:
+        args.model = m
+
+        #hqq
+        print("Measuring base for hqq")
+        args.quant_method = 'hqq'
+        model = model_loader(args, num_class=num_classes)
+        base_result = measure_latency_throughput(model, test_loader, is_quantized=False, warmup=args.warmup, runs=args.runs)
+        
+        for h in hqq_nbits:
+            for group in group_sizes:
+                print("Measuring latency and throughput for model: {}, quant_method: {}, nbits: {}, group_size: {}".format(args.model, 'hqq', h, group))
+
+                #for hqq: setup first
+                args.nbits = h
+                args.group_size = group
+
+                setupWandb(args)
+
+                quantized_model = hqq_quantization(args, model)
+                quantized_result = measure_latency_throughput(quantized_model, test_loader, is_quantized=True, warmup=args.warmup, runs=args.runs)
+                if args.wandb_mode != 'disabled':
+                    wandb.log(base_result)
+                    wandb.log(quantized_result)  
+                    wandb.finish()
+        
+        # to keep the results fair, we again revaluating , but this time in CPU
+        print("Measuring base for quanto")
+        args.quant_method = 'quanto'
+        model = model_loader(args, num_class=num_classes)
+        model.cpu()        
+        base_result = measure_latency_throughput(model, test_loader, is_quantized=False, warmup=args.warmup, runs=args.runs)
+
+        for q in quanto_nbits:
+            if m == 'ssm' and (q == 2 or q == 4):
+                continue #skip this combination, 
+            args.nbits = q
+            args.group_size = None
+            setupWandb(args)
+
+            quantized_model = quanto_quantization(args, model)
+            quantized_result = measure_latency_throughput(quantized_model, test_loader, is_quantized=True, warmup=args.warmup, runs=args.runs)
+            if args.wandb_mode != 'disabled':
+                wandb.log(base_result)
+                wandb.log(quantized_result)  
+                wandb.finish()
+    
+
+def measure_latency_throughput(model, test_loader, is_quantized=False, warmup=10, runs=10):
     """
     Runs inference over the entire test_loader.
     Latency = total_time / total_samples  * 1000 (milliseconds per sample)
     Throughput = total_samples / total_time  (samples per second)
     """
-    model.eval()
-    model = model.to(device)
+
+    device = next(model.parameters()).device  # follows model — cpu or cuda automatically
 
     # warmup
     with torch.no_grad():
@@ -63,11 +233,10 @@ def measure_latency_throughput(model, test_loader, device, is_quantized=False, w
         prefix = ""
 
     return {
-        f'{prefix}_latency_ms':                 round(latency_ms, 2),
-        f'{prefix}_latency_std_ms':             round(latency_std, 2),
-        # f'{prefix}_latency_min_ms':             round(latency_min, 2),
-        # f'{prefix}_latency_max_ms':             round(latency_max, 2),
-        f'{prefix}_throughput_samples_per_sec': round(throughput, 2),
+        'device': device.type,
+        f'{prefix}latency_ms':                 round(latency_ms, 2),
+        f'{prefix}latency_std_ms':             round(latency_std, 2),
+        f'{prefix}throughput_samples_per_sec': round(throughput, 2),
     }
 
 
