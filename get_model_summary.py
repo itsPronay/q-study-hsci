@@ -12,8 +12,6 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 import torch
-import torch.nn as nn
-from torch import optim
 import torch.utils.data as Data
 import wandb
 from utils.data_prepare import mirror_hsi
@@ -22,17 +20,10 @@ from utils.data_prepare import train_and_test_data, train_and_test_label
 from utils.data_prepare import applyPCA
 from utils.download_dataset import downloadAndLoadDataset
 from utils.load_model import model_loader
-from models.mvit import MViT
-from models.spectralFormer import ViT
-from models.massFormer import Massformer
-from models.spectralSpacialMamba.model import mamba_1D_model, mamba_2D_model, mamba_SS_model
-import torch.nn as nn
 from quantizer.quantize_hqq import hqq_quantization
 from quantizer.quantize_quanto import quanto_quantization
 
 from utils.load_model import model_loader
-from train import get_base_args
-from eval import get_args
 import argparse
 
 parser = argparse.ArgumentParser('Latency and Throughput Measurement')
