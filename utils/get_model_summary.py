@@ -16,12 +16,12 @@ import torch.nn as nn
 from torch import optim
 import torch.utils.data as Data
 import wandb
-from utils.data_prepare import mirror_hsi
-from utils.data_prepare import choose_train_and_test
-from utils.data_prepare import train_and_test_data, train_and_test_label
-from utils.data_prepare import applyPCA
-from utils.download_dataset import downloadAndLoadDataset
-from utils.load_model import model_loader
+from .data_prepare import mirror_hsi
+from .data_prepare import choose_train_and_test
+from .data_prepare import train_and_test_data, train_and_test_label
+from .data_prepare import applyPCA
+from .download_dataset import downloadAndLoadDataset
+from .load_model import model_loader
 from models.mvit import MViT
 from models.spectralFormer import ViT
 from models.massFormer import Massformer
@@ -30,7 +30,7 @@ import torch.nn as nn
 from quantizer.quantize_hqq import hqq_quantization
 from quantizer.quantize_quanto import quanto_quantization
 
-from utils.load_model import model_loader
+from .load_model import model_loader
 from train import get_base_args
 from eval import get_args
 import argparse
