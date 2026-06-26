@@ -40,7 +40,7 @@ parser = argparse.ArgumentParser('Latency and Throughput Measurement')
 parser.add_argument('--model', type=str)
 parser.add_argument('--group_size', type=lambda x: None if x.lower() == 'none' else int(x))
 parser.add_argument('--nbits', type=str)
-parser.add_argument('--warmup', type=int, default=3)
+parser.add_argument('--warmup', type=int, default=2)
 parser.add_argument('--runs', type=int, default=5)
 parser.add_argument('--quant_method', type=str)
 
@@ -85,8 +85,9 @@ def setupWandb(args):
         )
 
 def log_latency_throughput_to_wandb():
+    print(args)
     # Load data
-    data, label = downloadAndLoadDataset(args.dataset)
+    data, label = downloadAndLoadDataset("Pavia")
     num_classes = int(np.max(label))
 
     # apply normalization
