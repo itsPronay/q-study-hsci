@@ -10,23 +10,27 @@ from optimum.quanto import (
 def quanto_quantization(args, model):
 
     exclude_layers = []
-    if args.model == 'mvit':
-        exclude_layers = [
-            "cls_head"
-        ]
-    elif args.model == 'sf':
-        exclude_layers = [
-            "mlp_head",
-            "patch_to_embedding", 
-        ]
-    elif args.model == 'ssm':
-        exclude_layers = [
-            "head",   
-        ]
-    elif args.model == 'mf':
-        exclude_layers = [
-            "head",
-        ]
+
+    if args.exclude_layers is not None:
+        if args.model == 'mvit':
+            exclude_layers = [
+                "cls_head"
+            ]
+        elif args.model == 'sf':
+            exclude_layers = [
+                "mlp_head",
+                "patch_to_embedding", 
+            ]
+        elif args.model == 'ssm':
+            exclude_layers = [
+                "head",   
+            ]
+        elif args.model == 'mf':
+            exclude_layers = [
+                "head",
+            ]
+    else:
+        exclude_layers = args.exclude_layers
 
     qtype_map = {
         2: qint2,
@@ -35,8 +39,10 @@ def quanto_quantization(args, model):
         88: qfloat8, # pass 88 for float8
     }
 
-    print(f"Quantizing model with {args.nbits}-bit quantization using Quanto...")
+    print("-" * 50)
+    print(f"Quantizing {args.model} with {args.nbits}-bit quantization using Quanto...")
     print(f"Excluding layers from quantization: {exclude_layers}")
+    print("-" * 50)
 
     weights_qtype = qtype_map[args.nbits]
     

@@ -164,7 +164,7 @@ def main():
         'OA_quantized': OA_quantized * 100,
         'AA_quantized': AA_mean_quantized * 100,
         'Kappa_quantized': kappa_quantized * 100,
-        'exclude_layers': args.exclude_layers if args.exclude_layers else ["Default layers excluded based on model type"],
+        'exclude_layers': args.exclude_layers,
         **getClassOutputForEachClass( class_acc),
         **getClassOutputForEachClass(clas_acc_quantized, is_quantized=True),
     }
