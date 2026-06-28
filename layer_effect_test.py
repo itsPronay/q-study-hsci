@@ -38,7 +38,7 @@ def get_args():
     
     # wandb 
     parser.add_argument("--wandb_mode", default="online", choices=["online", "offline", "disabled"])
-    parser.add_argument('--wandb_project', type=str, default='QHSIC_sdfinal_studyf', help='wandb project name')
+    parser.add_argument('--wandb_project', type=str, default='QHSIC_sddffinal_studyf', help='wandb project name')
 
     args = parser.parse_args()
     return args
@@ -49,6 +49,8 @@ def main():
     This function loads the saved model, evaluates it on the test set,
     then applies quantization, and evaluates the quantized model.
     """ 
+    args.wandb_mode = "online"  #remove later
+
     args = get_args()
 
     if args.wandb_mode != 'disabled':
