@@ -38,7 +38,7 @@ def get_args():
     
     # wandb 
     parser.add_argument("--wandb_mode", default="online", choices=["online", "offline", "disabled"])
-    parser.add_argument('--wandb_project', type=str, default='QHSIC_sddffinal_studyf', help='wandb project name')
+    parser.add_argument('--wandb_project', type=str, default='QHSIC_sddffiddnal_studyf', help='wandb project name')
 
     args = parser.parse_args()
     return args
