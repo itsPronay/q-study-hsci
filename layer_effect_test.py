@@ -49,9 +49,9 @@ def main():
     This function loads the saved model, evaluates it on the test set,
     then applies quantization, and evaluates the quantized model.
     """ 
-    args.wandb_mode = "online"  #remove later
 
     args = get_args()
+    args.wandb_mode = "online"  #remove later
 
     if args.wandb_mode != 'disabled':
         wandb.init(
