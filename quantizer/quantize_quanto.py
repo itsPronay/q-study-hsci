@@ -11,7 +11,7 @@ def quanto_quantization(args, model):
 
     exclude_layers = []
 
-    if args.exclude_layers is not None:
+    if args.exclude_layers is None:
         if args.model == 'mvit':
             exclude_layers = [
                 "cls_head"
