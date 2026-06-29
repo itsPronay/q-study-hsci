@@ -279,6 +279,18 @@ def print_outliers(model, layer_names, threshold=3.0):
         mean = all_weights.mean()
         std  = all_weights.std()
 
+        abs_top10, top10_indices = torch.topk(all_weights.abs(), k=3)
+
+        for rank, idx in enumerate(top10_indices):
+            weight_value = all_weights[idx].item()
+            abs_value = abs_top10[rank].item()
+            print(
+                f"[INFO] Top {rank+1} outlier: "
+                f"weight={weight_value:.4f}, "
+                f"|weight|={abs_value:.4f}, "
+                f"index={idx.item()}"
+            )
+
         outlier_mask    = (all_weights - mean).abs() > threshold * std
         outlier_percent = outlier_mask.float().mean().item() * 100
 
