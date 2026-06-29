@@ -241,11 +241,13 @@ def print_outliers(model, layer_names, threshold=3.0):
     ignore = ["head", "dt_proj", "mlp_head", "patch_to_embedding", "cls_head"]
     filtered = [l for l in layer_names if l not in ignore]
 
+    print("_"*45)
     print(f"\n[INFO] Outlier analysis for model '{model.__class__.__name__}' with threshold {threshold}σ:")
     print("All the filtered layers to analyze:")
     print(filtered)
+    print("_"*45)
 
-    
+
     for layer_name in filtered:
         matches = find_matching_layers(model, layer_name, only_linear=True, print_results=False)
 
