@@ -233,11 +233,35 @@ import numpy as np
 #                 wandb.log(base_result)
 #                 wandb.log(quantized_result)  
 #                 wandb.finish()
+
+
 import torch
 from quantizer.hqq_wrapper import find_matching_layers
 
+def find_best_threshold(model, sensitive_layers):
+    thresholds = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
+
+    print(f"{'Threshold':>12}  {'Outlier %':>10}")
+    print(f"{'─'*30}")
+
+    for t in thresholds:
+        pcts = []
+        for layer_name in sensitive_layers:
+            matches = find_matching_layers(model, layer_name, only_linear=True, print_results=False)
+            for _, module in matches:
+                W    = module.weight.data.float()
+                mean = W.mean()
+                std  = W.std()
+                pct  = ((W - mean).abs() > t * std).float().mean().item() * 100
+                pcts.append(pct)
+
+        avg = sum(pcts) / len(pcts)
+        print(f"{t:>11}σ  {avg:>9.2f}%")
+
 def print_outliers(model, layer_names, threshold=3.0):
     model.eval()
+    find_best_threshold(model, layer_names)
+    
     ignore = ["head", "dt_proj", "mlp_head", "patch_to_embedding", "cls_head"]
     filtered = [l for l in layer_names if l not in ignore]
 
