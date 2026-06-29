@@ -234,26 +234,42 @@ import numpy as np
 #                 wandb.log(quantized_result)  
 #                 wandb.finish()
 import torch
+from quantizer.hqq_wrapper import find_matching_layers
 
-def print_outliers(model, layer_name, threshold=3.0):
-    module = dict(model.named_modules()).get(layer_name)
-    if module is None:
-        raise ValueError(f"Layer '{layer_name}' not found.")
-    if not isinstance(module, torch.nn.Linear):
-        raise ValueError(f"'{layer_name}' is not a Linear layer.")
+def print_outliers(model, layer_names, threshold=3.0):
+    model.eval()
 
-    W = module.weight.data.float()
-    mean = W.mean()
-    std  = W.std()
+    ignore = ["head", "dt_proj", "mlp_head", "patch_to_embedding", "cls_head"]
+    filtered = [l for l in layer_names if l not in ignore]
 
-    outlier_mask    = (W - mean).abs() > threshold * std
-    outlier_percent = outlier_mask.float().mean().item() * 100
+    for layer_name in filtered:
+        matches = find_matching_layers(model, layer_name, only_linear=True, print_results=False)
 
-    print(f"Layer    : {layer_name}")
-    print(f"Shape    : {list(W.shape)}")
-    print(f"Mean     : {mean.item():.4f}")
-    print(f"Std      : {std.item():.4f}")
-    print(f"Outliers : {outlier_percent:.2f}%")
+        if not matches:
+            print(f"\n[INFO] No Linear layers matched '{layer_name}'. Skipping.")
+            continue
+
+        print(f"\n[INFO] Outlier analysis for '{layer_name}' — {len(matches)} layer(s) matched:")
+        print("-*" * 45)
+        print('All the layers are')
+        for m in matches:
+            print(m[0])
+        print(f"{'─'*45}")
+
+        for full_name, module in matches:
+            W = module.weight.data.float()
+            mean = W.mean()
+            std  = W.std()
+
+            outlier_mask    = (W - mean).abs() > threshold * std
+            outlier_percent = outlier_mask.float().mean().item() * 100
+
+            print(f"  Layer    : {full_name}")
+            print(f"  Shape    : {list(W.shape)}")
+            print(f"  Mean     : {mean.item():.4f}")
+            print(f"  Std      : {std.item():.4f}")
+            print(f"  Outliers : {outlier_percent:.2f}%")
+            print(f"  {'─'*35}")
 
 
 def getParamCount(model, printLayers=False):

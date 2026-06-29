@@ -24,7 +24,7 @@ def hqq_quantization(args, model):
             ]
         elif args.model == 'mf':
             exclude_layers = [
-                "head"   
+                "head",
             ]
         else:
             raise ValueError(f"Unsupported model {args.model} for quantization")
