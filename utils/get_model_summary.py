@@ -260,17 +260,11 @@ def find_best_threshold(model, sensitive_layers):
 
 def print_outliers(model, layer_names, threshold=3.0):
     model.eval()
+
     find_best_threshold(model, layer_names)
-    
+
     ignore = ["head", "dt_proj", "mlp_head", "patch_to_embedding", "cls_head"]
     filtered = [l for l in layer_names if l not in ignore]
-
-    print("_"*45)
-    print(f"\n[INFO] Outlier analysis for model '{model.__class__.__name__}' with threshold {threshold}σ:")
-    print("All the filtered layers to analyze:")
-    print(filtered)
-    print("_"*45)
-
 
     for layer_name in filtered:
         matches = find_matching_layers(model, layer_name, only_linear=True, print_results=False)
@@ -279,33 +273,31 @@ def print_outliers(model, layer_names, threshold=3.0):
             print(f"\n[INFO] No Linear layers matched '{layer_name}'. Skipping.")
             continue
 
-        print(f"\n[INFO] Outlier analysis for '{layer_name}' — {len(matches)} layer(s) matched:")
-        print(f"{'─'*45}")
+        # aggregate all matched layers into one tensor
+        all_weights = torch.cat([module.weight.data.float().flatten() for _, module in matches])
 
-        for full_name, module in matches:
-            W = module.weight.data.float()
-            mean = W.mean()
-            std  = W.std()
+        mean = all_weights.mean()
+        std  = all_weights.std()
 
-            outlier_mask    = (W - mean).abs() > threshold * std
-            outlier_percent = outlier_mask.float().mean().item() * 100
+        outlier_mask    = (all_weights - mean).abs() > threshold * std
+        outlier_percent = outlier_mask.float().mean().item() * 100
 
-            frobenius = W.norm(p='fro').item()
-            rms       = W.pow(2).mean().sqrt().item()
-            abs_mean  = W.abs().mean().item()
-            abs_max   = W.abs().max().item()
+        frobenius = all_weights.norm(p='fro').item()
+        rms       = all_weights.pow(2).mean().sqrt().item()
+        abs_mean  = all_weights.abs().mean().item()
+        abs_max   = all_weights.abs().max().item()
 
-            print(f"  Layer      : {full_name}")
-            print(f"  Shape      : {list(W.shape)}")
-            print(f"  Mean       : {mean.item():.4f}")
-            print(f"  Std        : {std.item():.4f}")
-            print(f"  Outliers   : {outlier_percent:.2f}%  (threshold: ±{threshold}σ)")
-            print(f"  ── Magnitude ──────────────────────")
-            print(f"  Frobenius  : {frobenius:.4f}")
-            print(f"  RMS        : {rms:.4f}")
-            print(f"  Abs mean   : {abs_mean:.4f}")
-            print(f"  Abs max    : {abs_max:.4f}")
-            print(f"  {'─'*35}")
+        print(f"\n[INFO] Outlier analysis for '{layer_name}' — {len(matches)} layer(s) aggregated:")
+        print(f"  Total params : {all_weights.numel():,}")
+        print(f"  Mean         : {mean.item():.4f}")
+        print(f"  Std          : {std.item():.4f}")
+        print(f"  Outliers     : {outlier_percent:.2f}%  (threshold: ±{threshold}σ)")
+        print(f"  ── Magnitude ──────────────────────")
+        print(f"  Frobenius    : {frobenius:.4f}")
+        print(f"  RMS          : {rms:.4f}")
+        print(f"  Abs mean     : {abs_mean:.4f}")
+        print(f"  Abs max      : {abs_max:.4f}")
+        print(f"  {'─'*35}")
 
 
 def getParamCount(model, printLayers=False):
