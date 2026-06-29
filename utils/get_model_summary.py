@@ -238,10 +238,14 @@ from quantizer.hqq_wrapper import find_matching_layers
 
 def print_outliers(model, layer_names, threshold=3.0):
     model.eval()
-
     ignore = ["head", "dt_proj", "mlp_head", "patch_to_embedding", "cls_head"]
     filtered = [l for l in layer_names if l not in ignore]
 
+    print(f"\n[INFO] Outlier analysis for model '{model.__class__.__name__}' with threshold {threshold}σ:")
+    print("All the filtered layers to analyze:")
+    print(filtered)
+
+    
     for layer_name in filtered:
         matches = find_matching_layers(model, layer_name, only_linear=True, print_results=False)
 
@@ -250,10 +254,6 @@ def print_outliers(model, layer_names, threshold=3.0):
             continue
 
         print(f"\n[INFO] Outlier analysis for '{layer_name}' — {len(matches)} layer(s) matched:")
-        print("-*" * 45)
-        print('All the layers are')
-        for m in matches:
-            print(m[0])
         print(f"{'─'*45}")
 
         for full_name, module in matches:
@@ -264,11 +264,21 @@ def print_outliers(model, layer_names, threshold=3.0):
             outlier_mask    = (W - mean).abs() > threshold * std
             outlier_percent = outlier_mask.float().mean().item() * 100
 
-            print(f"  Layer    : {full_name}")
-            print(f"  Shape    : {list(W.shape)}")
-            print(f"  Mean     : {mean.item():.4f}")
-            print(f"  Std      : {std.item():.4f}")
-            print(f"  Outliers : {outlier_percent:.2f}%")
+            frobenius = W.norm(p='fro').item()
+            rms       = W.pow(2).mean().sqrt().item()
+            abs_mean  = W.abs().mean().item()
+            abs_max   = W.abs().max().item()
+
+            print(f"  Layer      : {full_name}")
+            print(f"  Shape      : {list(W.shape)}")
+            print(f"  Mean       : {mean.item():.4f}")
+            print(f"  Std        : {std.item():.4f}")
+            print(f"  Outliers   : {outlier_percent:.2f}%  (threshold: ±{threshold}σ)")
+            print(f"  ── Magnitude ──────────────────────")
+            print(f"  Frobenius  : {frobenius:.4f}")
+            print(f"  RMS        : {rms:.4f}")
+            print(f"  Abs mean   : {abs_mean:.4f}")
+            print(f"  Abs max    : {abs_max:.4f}")
             print(f"  {'─'*35}")
 
 
