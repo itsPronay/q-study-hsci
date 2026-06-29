@@ -233,6 +233,27 @@ import numpy as np
 #                 wandb.log(base_result)
 #                 wandb.log(quantized_result)  
 #                 wandb.finish()
+import torch
+
+def print_outliers(model, layer_name, threshold=3.0):
+    module = dict(model.named_modules()).get(layer_name)
+    if module is None:
+        raise ValueError(f"Layer '{layer_name}' not found.")
+    if not isinstance(module, torch.nn.Linear):
+        raise ValueError(f"'{layer_name}' is not a Linear layer.")
+
+    W = module.weight.data.float()
+    mean = W.mean()
+    std  = W.std()
+
+    outlier_mask    = (W - mean).abs() > threshold * std
+    outlier_percent = outlier_mask.float().mean().item() * 100
+
+    print(f"Layer    : {layer_name}")
+    print(f"Shape    : {list(W.shape)}")
+    print(f"Mean     : {mean.item():.4f}")
+    print(f"Std      : {std.item():.4f}")
+    print(f"Outliers : {outlier_percent:.2f}%")
 
 
 def getParamCount(model, printLayers=False):

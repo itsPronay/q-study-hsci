@@ -22,6 +22,7 @@ from quantizer.quantize_hqq import hqq_quantization
 from quantizer.quantize_quanto import quanto_quantization
 
 from utils.load_model import model_loader
+from utils.get_model_summary import print_outliers
 from train import get_base_args
 
 
@@ -35,6 +36,7 @@ def get_args():
     parser.add_argument('--del_orig', type=lambda x: x.lower() == 'true', default=True, help='if True, delete the original Linear weight inside HQQLinear')
     parser.add_argument('--verbose', type=lambda x: x.lower() == 'true', default=True, help='if True, print replacement information')
     parser.add_argument("--exclude_layers",type=str, nargs="+", default=None, help="pass layers to exclude from quantization")
+    parser.add_argument('--outlier_threshold', type=float, default=3)
     
     # wandb 
     parser.add_argument("--wandb_mode", default="online", choices=["online", "offline", "disabled"])
@@ -123,6 +125,8 @@ def main():
     model.load_state_dict(torch.load(saved_path))
     model.eval()
 
+    print_outliers(model, args.exclude_layers, threshold=args.outlier_threshold)  # Print outliers in the model before quantization
+
     # test model before quantizing
     print("started testing model before quantization")
     test_tar, test_pre = test(model, test_loader)
@@ -143,6 +147,8 @@ def main():
     print("started testing model after quantization")
     test_tar_quantized, test_pre_quantized = test(quantized_model, test_loader)
     OA_quantized, AA_mean_quantized, kappa_quantized, AA_quantized = output_metric(test_tar_quantized, test_pre_quantized)
+
+    print_outliers(quantized_model, args.exclude_layers, threshold=args.outlier_threshold)  # Print outliers in the model before quantization
 
     # get per class accuracy for both original and quantized model
     class_acc = class_accuracy_percent(test_tar, test_pre, num_classes)

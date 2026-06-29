@@ -199,3 +199,26 @@ def replace_all_linear_with_hqq_safe(
 
     print(f"\n[HQQ] Done. Replaced: {len(replaced)} | Skipped: {len(skipped)}")
     return model
+
+def find_matching_layers(model, layer_name, only_linear=False, print_results=True):
+    """
+    Finds and prints all module names in `model` that match `layer_name`.
+    Match = substring match (same logic your exclude_names uses).
+
+    e.g. find_matching_layers(model, "to_qkv") -> matches
+         "transformer.layers.0.0.fn.fn.to_qkv", etc.
+    """
+    matches = []
+
+    for name, module in model.named_modules():
+        if layer_name in name:
+            if only_linear and not isinstance(module, torch.nn.Linear):
+                continue
+            matches.append((name, module))
+
+    if print_results:
+        print(f"Found {len(matches)} module(s) matching '{layer_name}':")
+        for name, module in matches:
+            print(f"  - {name}  ->  {module}")
+
+    return matches
