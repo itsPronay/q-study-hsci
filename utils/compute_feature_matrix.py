@@ -159,12 +159,29 @@ def compare_cka_and_print_result(
     else:
         layer_names = []
 
+    if model_name == 'mvit':
+        matched_layer_names = [
+            'blocks.0.attn.qkv', 
+            'blocks.0.attn.proj', 
+            'blocks.0.mlp.fc1', 
+            'blocks.0.mlp.fc2', 
+            'blocks.1.attn.qkv', 
+            'blocks.1.attn.proj', 
+            'blocks.1.mlp.fc1', 
+            'blocks.1.mlp.fc2', 
+            'blocks.2.attn.qkv', 
+            'blocks.2.attn.proj', 
+            'blocks.2.mlp.fc1', 
+            'blocks.2.mlp.fc2'
+        ]
+
 
     if isinstance(layer_names, str):
         layer_names = [layer_names]
 
     matched_layer_names = []
     for name, module in model.named_modules():
+        print(repr(name), type(module))
         if any(ln in name for ln in layer_names) and isinstance(module, torch.nn.Linear):
             matched_layer_names.append(name)
     
