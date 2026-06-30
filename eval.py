@@ -148,7 +148,7 @@ def main():
     clas_acc_quantized = class_accuracy_percent(test_tar_quantized, test_pre_quantized, num_classes)
 
     compare_cka_and_print_result(
-        layer_name = args.exclude_layers[0],
+        layer_name = args.exclude_layers[0], #always pass layer name first u wanna test on
         model = model,
         quantized_model = quantized_model,
         test_loader = test_loader,

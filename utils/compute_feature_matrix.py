@@ -128,8 +128,8 @@ def compare_cka_and_print_result(
     print(matched_layer_names)
 
     cka = CrossModelCKA(
-        model_a = [model],
-        model_b = [quantized_model],
+        model_a = model,
+        model_b = quantized_model,
         layer_names = matched_layer_names,
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
     )
