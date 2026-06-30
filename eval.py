@@ -119,6 +119,7 @@ def main():
 
     saved_path = './model/' + args.model + '_' + args.dataset + '.pt'
     model = model_loader(args, num_class=num_classes)
+    ref_model = model
     model.load_state_dict(torch.load(saved_path))
     model.eval()
 
@@ -149,7 +150,7 @@ def main():
 
     compare_cka_and_print_result(
         model_name = args.model,
-        model = model,
+        model = ref_model,
         quantized_model = quantized_model,
         test_loader = test_loader,
         batch_limit = None,
