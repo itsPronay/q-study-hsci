@@ -147,10 +147,7 @@ def main():
     class_acc = class_accuracy_percent(test_tar, test_pre, num_classes)
     clas_acc_quantized = class_accuracy_percent(test_tar_quantized, test_pre_quantized, num_classes)
 
-    mvit_layers = ['qkv', 'proj', 'fc1', 'fc2', 'cls_head']
-
     compare_cka_and_print_result(
-        layer_name = mvit_layers,
         model = model,
         quantized_model = quantized_model,
         test_loader = test_loader,

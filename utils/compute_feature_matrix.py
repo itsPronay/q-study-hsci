@@ -139,7 +139,7 @@ class CrossModelCKA:
 
 
 def compare_cka_and_print_result(
-        layer_names,                      # now accepts a string OR a list
+        model_name: str,
         model: nn.Module,
         quantized_model: nn.Module,
         test_loader: torch.utils.data.DataLoader,
@@ -149,6 +149,12 @@ def compare_cka_and_print_result(
         name_a='Original',
         name_b='Quantized'
 ):
+    if model_name == 'mvit':
+        layer_names = ['qkv', 'proj', 'fc1', 'fc2']
+    else:
+        layer_names = []
+
+        
     if isinstance(layer_names, str):
         layer_names = [layer_names]
 
