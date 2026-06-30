@@ -180,7 +180,7 @@ def compare_cka_and_print_result(
         name_b=name_b
     )
 
-    cka.compare(test_loader, num_batches_limit=64)
+    cka.compare(test_loader, num_batches_limit=None)
 
     cka.plot_cka(
         save_path=save_path,
