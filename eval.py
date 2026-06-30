@@ -119,7 +119,7 @@ def main():
 
     saved_path = './model/' + args.model + '_' + args.dataset + '.pt'
     model = model_loader(args, num_class=num_classes)
-    ref_model = model
+    ref_model = model.eval()
     model.load_state_dict(torch.load(saved_path))
     model.eval()
 
