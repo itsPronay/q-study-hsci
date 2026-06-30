@@ -139,7 +139,7 @@ class CrossModelCKA:
 
 
 def compare_cka_and_print_result(
-        layer_name,
+        layer_names,                      # now accepts a string OR a list
         model: nn.Module,
         quantized_model: nn.Module,
         test_loader: torch.utils.data.DataLoader,
@@ -149,11 +149,15 @@ def compare_cka_and_print_result(
         name_a='Original',
         name_b='Quantized'
 ):
+    if isinstance(layer_names, str):
+        layer_names = [layer_names]
+
     matched_layer_names = []
     for name, module in model.named_modules():
-        if layer_name in name and isinstance(module, torch.nn.Linear):
+        if any(ln in name for ln in layer_names) and isinstance(module, torch.nn.Linear):
             matched_layer_names.append(name)
 
+    print(f"Matched {len(matched_layer_names)} layers:")
     print(matched_layer_names)
 
     cka = CrossModelCKA(
@@ -169,7 +173,7 @@ def compare_cka_and_print_result(
 
     cka.plot_cka(
         save_path=save_path,
-        title=title or f'CKA: {name_a} vs {name_b} for layer: "{layer_name}"'
+        title=title or f'CKA: {name_a} vs {name_b} for layers: {layer_names}'
     )
 
     return cka
