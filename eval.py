@@ -17,6 +17,7 @@ from utils.data_prepare import applyPCA
 from utils.train_utils import train, test, valid, output_metric, class_accuracy_percent
 from utils.download_dataset import downloadAndLoadDataset
 from utils.load_model import model_loader
+from utils.compute_feature_matrix import compare_cka_and_print_result
 
 from quantizer.quantize_hqq import hqq_quantization
 from quantizer.quantize_quanto import quanto_quantization
@@ -146,6 +147,15 @@ def main():
     class_acc = class_accuracy_percent(test_tar, test_pre, num_classes)
     clas_acc_quantized = class_accuracy_percent(test_tar_quantized, test_pre_quantized, num_classes)
 
+    compare_cka_and_print_result(
+        layer_name = args.exclude_layers,
+        model = model,
+        quantized_model = quantized_model,
+        test_loader = test_loader,
+        batch_limit = None,
+        save_path = f'cka_comparison_{args.model}_{args.dataset}.png'
+    )
+    
     if args.model == 'mvit':
         model_name = 'MViT'
     elif args.model == 'ssm':
@@ -155,6 +165,27 @@ def main():
     elif args.model == 'mf':
         model_name = 'MassFormer'
 
+    def get_default_layers_per_model():
+        if args.model == 'mvit':
+            exclude_layers = [
+                "cls_head"
+            ]
+        elif args.model == 'sf':
+            exclude_layers = [
+                "mlp_head",
+                "patch_to_embedding", 
+            ]
+        elif args.model == 'ssm':
+            exclude_layers = [
+                "dt_proj",   
+                "head",   
+            ]
+        elif args.model == 'mf':
+            exclude_layers = [
+                "head",
+            ]
+        return exclude_layers
+
     results = {
         'model_name_full' : model_name,
         'OA': OA * 100,
@@ -163,7 +194,7 @@ def main():
         'OA_quantized': OA_quantized * 100,
         'AA_quantized': AA_mean_quantized * 100,
         'Kappa_quantized': kappa_quantized * 100,
-        'exclude_layers': args.exclude_layers if args.exclude_layers else ["Default layers excluded based on model type"],
+        'final_exclude_layers': args.exclude_layers if args.exclude_layers is not None else get_default_layers_per_model(),
         **getClassOutputForEachClass( class_acc),
         **getClassOutputForEachClass(clas_acc_quantized, is_quantized=True),
     }

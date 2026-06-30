@@ -17,7 +17,7 @@ from utils.data_prepare import applyPCA
 from utils.train_utils import train, test, valid, output_metric, class_accuracy_percent
 from utils.download_dataset import downloadAndLoadDataset
 from utils.load_model import model_loader
-
+from utils.compute_feature_matrix import CrossModelCKA
 from quantizer.quantize_hqq import hqq_quantization
 from quantizer.quantize_quanto import quanto_quantization
 
