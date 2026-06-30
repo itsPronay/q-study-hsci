@@ -1,3 +1,4 @@
+from sympy import denom
 import torch
 import torch.nn as nn
 from functools import partial
@@ -87,9 +88,11 @@ class CrossModelCKA:
 
             self._compare_cka(total_batches)
 
-        self.hsic_matrix = self.hsic_matrix[:, :, 1] / (
-            self.hsic_matrix[:, :, 0].sqrt() * self.hsic_matrix[:, :, 2].sqrt() + 1e-8
-        )
+        denom = (self.hsic_matrix[:, :, 0].clamp(min=0).sqrt() * self.hsic_matrix[:, :, 2].clamp(min=0).sqrt() + 1e-8)
+        self.hsic_matrix = self.hsic_matrix[:, :, 1] / denom
+        # self.hsic_matrix = self.hsic_matrix[:, :, 1] / (
+        #     self.hsic_matrix[:, :, 0].sqrt() * self.hsic_matrix[:, :, 2].sqrt() + 1e-8
+        # )
 
     def _compare_cka(self, num_batches):
         for i, name_i in enumerate(self.layer_names):
