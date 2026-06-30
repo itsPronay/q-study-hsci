@@ -151,10 +151,12 @@ def compare_cka_and_print_result(
 ):
     if model_name == 'mvit':
         layer_names = ['qkv', 'proj', 'fc1', 'fc2']
+    elif model_name == 'mf':
+        layer_names = ['to_q', 'to_kv', 'to_memory', 'to_out', 'nn1', 'nn2']
     else:
         layer_names = []
 
-        
+
     if isinstance(layer_names, str):
         layer_names = [layer_names]
 
@@ -162,7 +164,7 @@ def compare_cka_and_print_result(
     for name, module in model.named_modules():
         if any(ln in name for ln in layer_names) and isinstance(module, torch.nn.Linear):
             matched_layer_names.append(name)
-
+    
     print(f"Matched {len(matched_layer_names)} layers:")
     print(matched_layer_names)
 
