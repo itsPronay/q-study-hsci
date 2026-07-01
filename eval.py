@@ -40,6 +40,7 @@ def get_args():
     # wandb 
     parser.add_argument("--wandb_mode", default="online", choices=["online", "offline", "disabled"])
     parser.add_argument('--wandb_project', type=str, default='QHSIC_sfinal_studyf', help='wandb project name')
+    parser.add_argument('--cka', type=bool, default=False, help='if True, compute CKA between original and quantized model')
 
     args = parser.parse_args()
     return args
@@ -147,19 +148,21 @@ def main():
     class_acc = class_accuracy_percent(test_tar, test_pre, num_classes)
     clas_acc_quantized = class_accuracy_percent(test_tar_quantized, test_pre_quantized, num_classes)
 
+    # loading model with new names cause hqq changes model in place 
+    # but we want to compare the original model with quantized model
+    if args.cka == True:
+        ref_model = model_loader(args, num_class=num_classes)
+        ref_model.load_state_dict(torch.load(saved_path))
+        ref_model.eval()
 
-    ref_model = model_loader(args, num_class=num_classes)
-    ref_model.load_state_dict(torch.load(saved_path))
-    ref_model.eval()
-
-    compare_cka_and_print_result(
-        model_name = args.model,
-        model = ref_model,
-        quantized_model = quantized_model,
-        test_loader = test_loader,
-        batch_limit = None,
-        save_path = f'cka_comparison_{args.model}_{args.dataset}.png'
-    )
+        compare_cka_and_print_result(
+            args = args,
+            model = ref_model,
+            quantized_model = quantized_model,
+            test_loader = test_loader,
+            batch_limit = None,
+            save_path = f'cka_comparison_{args.model}_{args.dataset}.png'
+        )
     
     if args.model == 'mvit':
         model_name = 'MViT'

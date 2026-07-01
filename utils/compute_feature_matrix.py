@@ -88,11 +88,15 @@ class CrossModelCKA:
 
             self._compare_cka(total_batches)
 
-        denom = (self.hsic_matrix[:, :, 0].clamp(min=0).sqrt() * self.hsic_matrix[:, :, 2].clamp(min=0).sqrt() + 1e-8)
-        self.hsic_matrix = self.hsic_matrix[:, :, 1] / denom
-        # self.hsic_matrix = self.hsic_matrix[:, :, 1] / (
-        #     self.hsic_matrix[:, :, 0].sqrt() * self.hsic_matrix[:, :, 2].sqrt() + 1e-8
-        # )
+        self.hsic_matrix = self.hsic_matrix[:, :, 1] / (
+            self.hsic_matrix[:, :, 0].sqrt() * self.hsic_matrix[:, :, 2].sqrt()
+        )
+
+        # denom = (self.hsic_matrix[:, :, 0].clamp(min=0).sqrt() * self.hsic_matrix[:, :, 2].clamp(min=0).sqrt() + 1e-8)
+        # self.hsic_matrix = self.hsic_matrix[:, :, 1] / denom
+        # # self.hsic_matrix = self.hsic_matrix[:, :, 1] / (
+        # #     self.hsic_matrix[:, :, 0].sqrt() * self.hsic_matrix[:, :, 2].sqrt() + 1e-8
+        # # )
 
     def _compare_cka(self, num_batches):
         for i, name_i in enumerate(self.layer_names):
@@ -140,9 +144,101 @@ class CrossModelCKA:
 
         return fig
 
+def compute_cka_similarity(
+        model: nn.Module,
+        layer_names: List[str],
+        test_loader: torch.utils.data.DataLoader,
+        device: str = 'cpu',
+        batch_limit=None,
+):
+    """
+    Computes the layer-by-layer CKA matrix within a single model:
+    """
+    model = model.to(device).eval()
+
+    features = {}
+
+    def _log_layer(name, layer, inp, out):
+        features[name] = out.detach()
+
+    for name, layer in model.named_modules():
+        if name in layer_names:
+            layer.register_forward_hook(partial(_log_layer, name))
+
+    def _HSIC(K, L):
+        N = K.shape[0]
+        ones = torch.ones(N, 1, device=device)
+        result = torch.trace(K @ L)
+        result += ((ones.t() @ K @ ones @ ones.t() @ L @ ones) / ((N - 1) * (N - 2))).item()
+        result -= ((ones.t() @ K @ L @ ones) * 2 / (N - 2)).item()
+        return (1 / (N * (N - 3)) * result).item()
+
+    def _flatten(feat):
+        return feat.reshape(feat.shape[0], -1)
+
+    N = len(layer_names)
+    hsic_matrix = torch.zeros(N, N, 3)
+
+    total_batches = batch_limit if batch_limit else len(test_loader)
+
+    with torch.no_grad():
+        for batch_idx, (x, *_) in enumerate(tqdm(test_loader, desc="| Comparing features |", total=total_batches)):
+            if batch_limit and batch_idx >= batch_limit:
+                break
+
+            x = x.to(device)
+            features.clear()
+
+            _ = model(x)
+
+            for i, name_i in enumerate(layer_names):
+                X = _flatten(features[name_i])
+                K = X @ X.t()
+                K.fill_diagonal_(0.0)
+                hsic_matrix[i, :, 0] += _HSIC(K, K) / total_batches
+
+                for j, name_j in enumerate(layer_names):
+                    Y = _flatten(features[name_j])
+                    L = Y @ Y.t()
+                    L.fill_diagonal_(0.0)
+
+                    assert K.shape == L.shape, f"Feature shape mismatch! {K.shape}, {L.shape}"
+
+                    hsic_matrix[i, j, 1] += _HSIC(K, L) / total_batches
+                    hsic_matrix[i, j, 2] += _HSIC(L, L) / total_batches
+
+    cka_matrix = hsic_matrix[:, :, 1] / (hsic_matrix[:, :, 0].sqrt() * hsic_matrix[:, :, 2].sqrt())
+
+    return cka_matrix
+
+def plot_cka_matrix(cka_matrix, save_path=None, title=None, show=True):
+    fig, ax = plt.subplots(figsize=(6, 5.25))
+    im = ax.imshow(cka_matrix.cpu(), origin='lower', cmap='magma')
+
+    ax.set_xlabel("Layers", fontsize=16)
+    ax.set_ylabel("Layers", fontsize=16)
+
+    labels = range(cka_matrix.shape[0])
+    ax.set_xticks(labels)
+    ax.set_yticks(labels)
+    ax.set_xticklabels(labels, fontsize=9)
+    ax.set_yticklabels(labels, fontsize=9)
+
+    ax.set_title(title or "CKA Similarity", fontsize=18)
+
+    add_colorbar(im)
+    plt.tight_layout(pad=0.25, w_pad=0.25, h_pad=0.25)
+
+    if save_path is not None:
+        plt.savefig(save_path, dpi=300)
+
+    if show:
+        plt.show()
+
+    return fig
 
 def compare_cka_and_print_result(
-        model_name: str,
+        args,
         model: nn.Module,
         quantized_model: nn.Module,
         test_loader: torch.utils.data.DataLoader,
@@ -152,11 +248,11 @@ def compare_cka_and_print_result(
         name_a='Original',
         name_b='Quantized'
 ):
-    if model_name == 'mvit':
+    if args.model == 'mvit':
         layer_names = ['qkv', 'proj', 'fc1', 'fc2']
-    elif model_name == 'mf':
+    elif args.model == 'mf':
         layer_names = ['to_q', 'to_kv', 'to_memory', 'to_out', 'nn1', 'nn2']
-    else:
+    else: # add them if necessary
         layer_names = []
 
     if isinstance(layer_names, str):
@@ -171,6 +267,14 @@ def compare_cka_and_print_result(
     for layer in matched_layer_names:
         print(f"  - {layer}")
 
+    # first do cka for models one by one 
+    cka_original = compute_cka_similarity(model, matched_layer_names, test_loader, device='cuda' if torch.cuda.is_available() else 'cpu', batch_limit=batch_limit)
+    plot_cka_matrix(cka_original, save_path=f'cka_original_{args.model}_nbits{args.nbits}.png', title=f'CKA for {args.model} original')
+
+    cka_quantized = compute_cka_similarity(quantized_model, matched_layer_names, test_loader, device='cuda' if torch.cuda.is_available() else 'cpu', batch_limit=batch_limit)
+    plot_cka_matrix(cka_quantized, save_path=f'cka_quantized_{args.model}_nbits{args.nbits}.png', title=f'CKA for {args.model} quantized')
+
+    #cka both models together
     cka = CrossModelCKA(
         model_a=model,
         model_b=quantized_model,
@@ -179,8 +283,7 @@ def compare_cka_and_print_result(
         name_a=name_a,
         name_b=name_b
     )
-
-    cka.compare(test_loader, num_batches_limit=None)
+    cka.compare(test_loader, num_batches_limit=batch_limit)
 
     cka.plot_cka(
         save_path=save_path,
