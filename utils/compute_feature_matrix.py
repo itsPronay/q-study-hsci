@@ -33,7 +33,8 @@ class CrossModelCKA:
                  layer_names: List[str],
                  device: str = 'cpu',
                  name_a: str = 'Original',
-                 name_b: str = 'Quantized'):
+                 name_b: str = 'Quantized'
+                 ):
         self.model_a = model_a.to(device).eval()
         self.model_b = model_b.to(device).eval()
         self.layer_names = layer_names
@@ -88,12 +89,12 @@ class CrossModelCKA:
 
             self._compare_cka(total_batches)
 
-        self.hsic_matrix = self.hsic_matrix[:, :, 1] / (
-            self.hsic_matrix[:, :, 0].sqrt() * self.hsic_matrix[:, :, 2].sqrt()
-        )
+        # self.hsic_matrix = self.hsic_matrix[:, :, 1] / (
+        #     self.hsic_matrix[:, :, 0].sqrt() * self.hsic_matrix[:, :, 2].sqrt()
+        # )
 
-        # denom = (self.hsic_matrix[:, :, 0].clamp(min=0).sqrt() * self.hsic_matrix[:, :, 2].clamp(min=0).sqrt() + 1e-8)
-        # self.hsic_matrix = self.hsic_matrix[:, :, 1] / denom
+        denom = (self.hsic_matrix[:, :, 0].clamp(min=0).sqrt() * self.hsic_matrix[:, :, 2].clamp(min=0).sqrt() + 1e-8)
+        self.hsic_matrix = self.hsic_matrix[:, :, 1] / denom
         # # self.hsic_matrix = self.hsic_matrix[:, :, 1] / (
         # #     self.hsic_matrix[:, :, 0].sqrt() * self.hsic_matrix[:, :, 2].sqrt() + 1e-8
         # # )
@@ -283,7 +284,7 @@ def compare_cka_and_print_result(
         name_a=name_a,
         name_b=name_b
     )
-    cka.compare(test_loader, num_batches_limit=batch_limit)
+    cka.compare(test_loader, num_batches_limit=None)
 
     cka.plot_cka(
         save_path=save_path,
